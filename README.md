@@ -12,7 +12,6 @@ A comprehensive full-stack application that analyzes resumes, performs ATS match
 - [Running the Application](#running-the-application)
 - [Project Structure](#project-structure)
 - [API Documentation](#api-documentation)
-- [Contributing](#contributing)
 - [License](#license)
 
 ## ✨ Features
