@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-stone-800/10 dark:border-stone-800/50;
+  }
+  
+  body {
+    @apply font-sans antialiased bg-[#F7F7F7] dark:bg-[#1C1C1C] text-stone-900 dark:text-[#E0E0E0];
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/70 dark:bg-[#262626]/70 backdrop-blur-md border border-white/20 dark:border-white/10;
+  }
+  
+  .card-gradient {
+    @apply bg-gradient-to-br from-white to-stone-50 dark:from-[#262626] dark:to-[#1C1C1C];
+  }
+
+  /* ByeWind specific utility classes */
+  .metric-card-light {
+    @apply bg-[#FFFFFF] text-[#1C1C1C] shadow-sm border border-stone-200/50;
+  }
+  
+  .metric-card-dark {
+    @apply bg-[#262626] text-[#E0E0E0] border border-stone-800/50;
+  }
+
+  .sidebar-surface {
+    @apply bg-white dark:bg-[#1C1C1C] border-r border-stone-200/50 dark:border-stone-800/50;
+  }
+}
