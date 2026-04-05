@@ -23,19 +23,6 @@ async function getResumeById(id, userId) {
   return Resume.findOne({ _id: id, userId });
 }
 
-async function storeMatchAnalysis(resumeId, matchAnalysis) {
-  return Resume.findByIdAndUpdate(
-    resumeId,
-    {
-      analysis: {
-        match: matchAnalysis
-      },
-      status: 'analyzed'
-    },
-    { new: true }
-  );
-}
-
 async function updateResumeAnalysis(resumeId, analysis) {
   return Resume.findByIdAndUpdate(
     resumeId,
@@ -47,24 +34,14 @@ async function updateResumeAnalysis(resumeId, analysis) {
   );
 }
 
-async function storeAtsAnalysis(resumeId, atsAnalysis) {
-  return Resume.findByIdAndUpdate(
-    resumeId,
-    {
-      $set: {
-        'analysis.ats': atsAnalysis
-      },
-      status: 'analyzed'
-    },
-    { new: true }
-  );
+async function deleteResumeById(id, userId) {
+  return Resume.findOneAndDelete({ _id: id, userId });
 }
 
 module.exports = {
   createResume,
   listResumes,
   getResumeById,
-  storeMatchAnalysis,
   updateResumeAnalysis,
-  storeAtsAnalysis
+  deleteResumeById
 };

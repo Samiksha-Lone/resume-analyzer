@@ -27,16 +27,15 @@ const LearningRoadmap = ({ roadmap }) => {
             className="bg-white dark:bg-[#262626] rounded-[32px] p-8 border border-stone-200 dark:border-white/5 relative overflow-hidden group hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-500"
           >
             {/* Week Badge */}
-            <div className="absolute top-0 right-0 p-8">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500 opacity-20 group-hover:opacity-100 transition-opacity">WEEK {weekData.week || idx + 1}</span>
-            </div>
-
             <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 rounded-xl bg-indigo-500/20 flex items-center justify-center">
-                  <Calendar className="w-4 h-4 text-indigo-500" />
+              <div className="flex flex-row items-center justify-between gap-4 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-indigo-500/20 flex items-center justify-center">
+                    <Calendar className="w-4 h-4 text-indigo-500" />
+                  </div>
+                  <h4 className="text-lg font-bold tracking-tight dark:text-white leading-tight">{weekData.title || `Phase ${idx+1}`}</h4>
                 </div>
-                <h4 className="text-lg font-bold tracking-tight dark:text-white">{weekData.title || `Phase ${idx+1}`}</h4>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500/40 whitespace-nowrap bg-indigo-500/5 px-3 py-1 rounded-full">WEEK {weekData.week || idx + 1}</span>
               </div>
 
               <ul className="space-y-4">
@@ -64,7 +63,16 @@ const LearningRoadmap = ({ roadmap }) => {
           <h4 className="text-xl font-bold tracking-tight mb-1">Ready to start?</h4>
           <p className="text-white/70 text-sm font-medium">Follow this roadmap to increase your match score by up to 25%.</p>
         </div>
-        <button className="relative z-10 bg-white text-indigo-500 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-stone-50 transition-colors flex items-center gap-2 group">
+        <button 
+          onClick={() => {
+            const firstTask = roadmap?.[0]?.tasks?.[0];
+            if (firstTask) {
+              const query = encodeURIComponent(firstTask);
+              window.open(`https://www.youtube.com/results?search_query=${query}`, '_blank');
+            }
+          }}
+          className="relative z-10 bg-white text-indigo-500 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-stone-50 transition-colors flex items-center gap-2 group"
+        >
           Begin Learning Path <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
         </button>
         

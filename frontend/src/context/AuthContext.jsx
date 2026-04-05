@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         try {
           const res = await api.get('/auth/profile');
-          setUser(res.data);
+          setUser(res.data?.data?.user || res.data);
         } catch (error) {
           console.error('Failed to fetch user:', error);
           logout();
@@ -54,7 +54,8 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const res = await api.post('/auth/login', { email, password });
-      const { token: newToken, ...userData } = res.data;
+      const responseData = res.data?.data || res.data;
+      const { token: newToken, user: userData } = responseData;
       setToken(newToken);
       setUser(userData);
       localStorage.setItem('token', newToken);
@@ -68,7 +69,8 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, email, password) => {
     try {
       const res = await api.post('/auth/signup', { name, email, password });
-      const { token: newToken, ...userData } = res.data;
+      const responseData = res.data?.data || res.data;
+      const { token: newToken, user: userData } = responseData;
       setToken(newToken);
       setUser(userData);
       localStorage.setItem('token', newToken);

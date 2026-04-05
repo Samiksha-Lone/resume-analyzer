@@ -1,6 +1,6 @@
 const { analyzeMatchWithOllama } = require('./ai.service');
-const { computeAtsCompatibility } = require('./ats.service');
-const { fetchGithubRepos, verifySkillsAgainstGithub } = require('./github.service');
+const { analyzeIndustryBenchmark } = require('./benchmark.service');
+const { pushAndRank } = require('./percentile.service');
 
 const stopwords = new Set([
   'and', 'or', 'the', 'a', 'an', 'to', 'for', 'of', 'in', 'on', 'with', 'by', 'from',
@@ -44,11 +44,34 @@ const aiToneIndicators = [
 ];
 
 function normalize(text) {
-  return text.replace(/\s+/g, ' ').trim().toLowerCase();
+  return String(text || '').replace(/\s+/g, ' ').trim().toLowerCase();
 }
 
 function splitSentences(text) {
   return text.match(/[^.!?]+[.!?]+/g) || [text];
+}
+
+function extractContactInfo(text) {
+  const email = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(text);
+  const phone = /\b(?:\+?\d{1,3}[\s.-]?)?(?:\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4})\b/.test(text);
+  return { email, phone, contactFound: email || phone };
+}
+
+function findSections(text) {
+  const headers = [
+    'experience', 'work experience', 'professional experience', 'education', 'skills',
+    'projects', 'certifications', 'summary', 'objective', 'achievements', 'technical skills'
+  ];
+  return headers.filter((header) => text.includes(header));
+}
+
+function countMatches(text, patterns) {
+  const lower = text.toLowerCase();
+  return patterns.reduce((count, pattern) => {
+    const regex = new RegExp(`\\b${pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'g');
+    const found = lower.match(regex);
+    return count + (found ? found.length : 0);
+  }, 0);
 }
 
 function computeAiToneAnalysis(text) {
@@ -67,27 +90,12 @@ function computeAiToneAnalysis(text) {
     : `Resume sounds human-like (${confidence}% confidence)`;
 
   const suggestions = [];
-  if (aiToneCount > 0) {
-    suggestions.push('Reduce AI-style buzzwords and template phrases; make each bullet feel specific to your work.');
-  }
-  if (genericPhraseCount > 0) {
-    suggestions.push('Replace generic descriptions with concrete results or technologies used in your project.');
-  }
-  if (longSentenceCount > 0) {
-    suggestions.push('Shorten overly polished sentences into concise resume bullets.');
-  }
-  if (suggestions.length === 0) {
-    suggestions.push('Add more personalized details about the actual impact and scope of your work.');
-  }
+  if (aiToneCount > 0) suggestions.push('Reduce AI-style buzzwords and template phrases.');
+  if (genericPhraseCount > 0) suggestions.push('Replace generic descriptions with concrete results.');
+  if (longSentenceCount > 0) suggestions.push('Shorten overly polished sentences.');
+  if (suggestions.length === 0) suggestions.push('Add more personalized details.');
 
-  return {
-    confidence,
-    label,
-    aiToneCount,
-    genericPhraseCount,
-    longSentenceCount,
-    suggestions
-  };
+  return { confidence, label, suggestions };
 }
 
 function tokenize(text) {
@@ -123,120 +131,70 @@ function difference(a, b) {
   return a.filter((item) => !setB.has(item));
 }
 
-function countMatches(text, patterns) {
-  const lower = text.toLowerCase();
-  return patterns.reduce((count, pattern) => {
-    const regex = new RegExp(`\\b${pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'g');
-    const found = lower.match(regex);
-    return count + (found ? found.length : 0);
-  }, 0);
-}
-
 function extractNumericHighlights(text) {
   const matches = text.match(/\b\d+(?:\.\d+)?%?\b/g) || [];
   return matches.length;
 }
 
-function computeProjectDepthAnalysis(text) {
-  const normalized = normalize(text);
-  const projectDepthCount = countMatches(normalized, projectDepthIndicators);
-  const advancedCount = countMatches(normalized, advancedProjectIndicators);
-  const apiCount = countMatches(normalized, [
-    'api integration', 'rest api', 'graphql', 'third-party api', 'api', 'integration'
-  ]);
-  const authCount = countMatches(normalized, [
-    'jwt', 'oauth', 'authentication', 'authorization', 'secure login', 'identity', 'access control'
-  ]);
-  const scalingCount = countMatches(normalized, [
-    'scaling', 'scalable', 'load balancing', 'performance optimization', 'distributed', 'cloud',
-    'deployment', 'production', 'high availability', 'monitoring', 'caching'
-  ]);
-  const crudPhraseCount = countMatches(normalized, genericCrudPhrases);
-
-  const score = Math.max(0, Math.min(100,
-    projectDepthCount * 12 + advancedCount * 7 + apiCount * 5 + authCount * 6 + scalingCount * 6 - crudPhraseCount * 8
-  ));
-
-  const label = score >= 55
-    ? 'Project descriptions show good technical depth'
-    : 'Project descriptions are likely too shallow or CRUD-focused';
-
-  const suggestions = [];
-  if (crudPhraseCount > 0 && advancedCount === 0) {
-    suggestions.push('Add JWT authentication implementation or OAuth details for a stronger technical narrative.');
-  }
-  if (apiCount === 0) {
-    suggestions.push('Mention API integration, REST/GraphQL work, or external service orchestration.');
-  }
-  if (authCount === 0) {
-    suggestions.push('Include authentication/authorization design decisions and security patterns.');
-  }
-  if (scalingCount === 0) {
-    suggestions.push('Mention performance optimization strategies, deployment, or scaling considerations.');
-  }
-  if (projectDepthCount === 0) {
-    suggestions.push('Emphasize real-world complexity by describing data flow, system architecture, or production readiness.');
-  }
-  if (suggestions.length === 0) {
-    suggestions.push('Continue highlighting integration, security, and scaling details in project descriptions.');
-  }
-
-  return {
-    score,
-    label,
-    projectDepthCount,
-    advancedCount,
-    apiCount,
-    authCount,
-    scalingCount,
-    crudPhraseCount,
-    suggestions
-  };
-}
-
+/**
+ * Consolidated Reality Check Score
+ * Integrates: Hiring Signals, Project Depth, and ATS Parsing logic
+ */
 function computeRealityCheck(text) {
   const normalized = normalize(text);
+  
+  // 1. Hiring Signals (Impact & Metrics)
   const impactCount = countMatches(normalized, impactWords);
-  const depthCount = countMatches(normalized, projectDepthIndicators);
+  const numberCount = extractNumericHighlights(normalized);
   const buzzwordCount = countMatches(normalized, genericBuzzwords);
   const genericPhraseCount = countMatches(normalized, genericCrudPhrases);
-  const numberCount = extractNumericHighlights(normalized);
+  
+  // 2. Technical Depth (Advanced indicators)
+  const depthCount = countMatches(normalized, projectDepthIndicators);
+  const advancedCount = countMatches(normalized, advancedProjectIndicators);
+  
+  // 3. ATS Structure
+  const contact = extractContactInfo(text);
+  const sections = findSections(normalized);
+  const keywordCount = unique(tokenize(normalized)).length;
 
-  const impactScore = Math.min(40, impactCount * 10);
-  const numberScore = Math.min(25, numberCount * 8);
-  const depthScore = Math.min(30, depthCount * 10);
-
-  const genericPenalty = Math.min(40, buzzwordCount * 8 + genericPhraseCount * 6);
-  const weaknessPenalty = normalized.includes('responsible for') || normalized.includes('worked on') ? 8 : 0;
-
-  let rawScore = impactScore + numberScore + depthScore - genericPenalty - weaknessPenalty;
+  // Scoring Logic
+  const impactScore = Math.min(30, impactCount * 8);
+  const numberScore = Math.min(20, numberCount * 6);
+  const depthScore = Math.min(25, depthCount * 8 + advancedCount * 4);
+  const atsScore = Math.min(25, (contact.contactFound ? 10 : 0) + (sections.length * 3));
+  
+  const penalties = Math.min(30, buzzwordCount * 5 + genericPhraseCount * 5);
+  
+  let rawScore = impactScore + numberScore + depthScore + atsScore - penalties;
   rawScore = Math.max(0, Math.min(100, rawScore));
 
-  const label = rawScore >= 60
-    ? '✅ Likely to pass screening'
-    : '⚠️ High chance of rejection';
+  const label = rawScore >= 65 ? '✅ Strong hiring potential' : rawScore >= 40 ? '⚠️ Moderate screening risk' : '❌ High rejection probability';
 
   const reasons = [];
-  if (impactCount > 0) reasons.push(`Impact language found (${impactCount})`);
-  if (numberCount > 0) reasons.push(`Numbers/metrics present (${numberCount})`);
-  if (depthCount > 0) reasons.push(`Project depth indicators found (${depthCount})`);
-  if (buzzwordCount > 0) reasons.push(`Buzzwords penalized (${buzzwordCount})`);
-  if (genericPhraseCount > 0) reasons.push(`Generic phrasing detected (${genericPhraseCount})`);
-  if (reasons.length === 0) reasons.push('No strong impact signals detected.');
+  if (impactCount > 2) reasons.push('Strong use of action-oriented impact language.');
+  if (numberCount > 1) reasons.push('Quantifiable metrics found (shows results-driven mindset).');
+  if (depthCount > 2) reasons.push('Project descriptions show good technical ownership.');
+  if (advancedCount > 1) reasons.push('Advanced technologies (Auth/Scaling/APIs) detected.');
+  if (!contact.contactFound) reasons.push('Contact information (email/phone) is missing or unparseable.');
+  if (sections.length < 4) reasons.push('Resume structure is missing standard professional sections.');
+  if (buzzwordCount > 3) reasons.push('Overuse of generic buzzwords detected.');
 
   return {
     score: rawScore,
     label,
-    impactCount,
-    numberCount,
-    depthCount,
-    buzzwordCount,
-    genericPhraseCount,
-    reasons
+    reasons,
+    details: {
+      impactCount,
+      numberCount,
+      depthCount,
+      atsCompatible: sections.length >= 5 && contact.contactFound,
+      scanTime: 6.0 + (sections.length * 0.2)
+    }
   };
 }
 
-async function analyzeResumeMatch({ resumeText, jobDescription, jobTitle, targetSkills = [], githubUsername }) {
+async function analyzeResumeMatch({ resumeText, jobDescription, jobTitle, targetSkills = [] }) {
   const normalizedResume = normalize(resumeText);
   const normalizedJD = normalize(jobDescription);
 
@@ -245,7 +203,6 @@ async function analyzeResumeMatch({ resumeText, jobDescription, jobTitle, target
     : extractCandidateSkills(normalizedJD, 30);
 
   const resumeTokens = unique(tokenize(normalizedResume));
-
   const matchedSkills = intersection(jdSkills, resumeTokens);
   const skillGaps = difference(jdSkills, matchedSkills);
 
@@ -253,91 +210,82 @@ async function analyzeResumeMatch({ resumeText, jobDescription, jobTitle, target
   const keywordOverlap = unique(tokenize(normalizedJD)).filter((token) => resumeTokens.includes(token)).length;
   const keywordCoverage = normalizedJD ? keywordOverlap / unique(tokenize(normalizedJD)).length : 0;
 
-  const baseScore = Math.round(((skillCoverage * 0.7) + (keywordCoverage * 0.3)) * 100);
+  const matchScore = Math.round(((skillCoverage * 0.7) + (keywordCoverage * 0.3)) * 100);
   const realityCheck = computeRealityCheck(resumeText);
-  const projectDepthAnalysis = computeProjectDepthAnalysis(resumeText);
-  const atsAnalysis = computeAtsCompatibility(resumeText);
+  const aiToneAnalysis = computeAiToneAnalysis(resumeText);
 
   let aiResult = {
-    aiMatchScore: 0,
-    matchedSkills,
-    skillGaps,
+    aiMatchScore: matchScore,
+    summary: 'AI analysis result',
     recommendations: [],
-    summary: 'AI analysis unavailable.',
     rewriteSuggestions: [],
-    projectDepthRecommendations: [],
-    aiToneScore: 0,
-    aiToneLabel: 'Human-tone analysis unavailable.',
-    humanizationSuggestions: []
+    learningRoadmap: [],
+    interviewPreparation: [],
+    mockInterviewQuestions: []
   };
 
   try {
-    aiResult = await analyzeMatchWithOllama({ resumeText: normalizedResume, jobDescription: normalizedJD, jobTitle, targetSkills: jdSkills });
+    const aiResponse = await analyzeMatchWithOllama({ 
+      resumeText: normalizedResume, 
+      jobDescription: normalizedJD, 
+      jobTitle, 
+      targetSkills: jdSkills 
+    });
+    aiResult = { ...aiResult, ...aiResponse };
   } catch (error) {
-    // AI fallback: keep heuristics and continue
+    // Fallback to heuristics
   }
 
-  const aiToneAnalysis = computeAiToneAnalysis(resumeText);
-  
-  let githubVerification = null;
-  if (githubUsername) {
-    const githubData = await fetchGithubRepos(githubUsername);
-    if (githubData) {
-      githubVerification = verifySkillsAgainstGithub(matchedSkills, githubData);
-    }
+  const finalJobMatchScore = aiResult.aiMatchScore || matchScore;
+  const finalReadinessScore = Math.round((finalJobMatchScore + realityCheck.score) / 2);
+  const finalAuthScore = 100 - (aiResult.aiToneScore || aiToneAnalysis.confidence);
+
+  // --- ML Feature 1: Industry Benchmark (TF-IDF + Cosine Similarity) ---
+  let benchmarkResult = null;
+  try {
+    benchmarkResult = analyzeIndustryBenchmark(resumeText);
+  } catch (e) {
+    console.warn('Benchmark ML failed (non-fatal):', e.message);
+  }
+
+  // --- ML Feature 2: Percentile Ranking (MongoDB aggregation) ---
+  let percentileRank = null;
+  try {
+    percentileRank = await pushAndRank({
+      jobTitle: jobTitle || (benchmarkResult?.detectedRole) || 'general',
+      readinessScore: finalReadinessScore,
+      jobMatchScore: finalJobMatchScore,
+      realityScore: realityCheck.score,
+      authenticityScore: finalAuthScore
+    });
+  } catch (e) {
+    console.warn('Percentile ML failed (non-fatal):', e.message);
   }
 
   return {
-    baseScore,
-    aiScore: aiResult.aiMatchScore,
+    jobMatchScore: finalJobMatchScore,
+    readinessScore: finalReadinessScore,
     matchedSkills: aiResult.matchedSkills || matchedSkills,
     skillGaps: aiResult.skillGaps || skillGaps,
-    recommendations: aiResult.recommendations || [],
-    summary: aiResult.summary || '',
-    rewriteSuggestions: aiResult.rewriteSuggestions || [],
-    projectDepthRecommendations: aiResult.projectDepthRecommendations || projectDepthAnalysis.suggestions,
-    projectDepthAnalysis,
+    summary: aiResult.summary,
+    recommendations: aiResult.recommendations,
+    rewriteSuggestions: aiResult.rewriteSuggestions,
+    realityCheck,
     aiToneAnalysis: {
+      ...aiToneAnalysis,
       confidence: aiResult.aiToneScore || aiToneAnalysis.confidence,
       label: aiResult.aiToneLabel || aiToneAnalysis.label,
-      suggestions: aiResult.humanizationSuggestions || aiToneAnalysis.suggestions,
-      aiToneCount: aiToneAnalysis.aiToneCount,
-      genericPhraseCount: aiToneAnalysis.genericPhraseCount,
-      longSentenceCount: aiToneAnalysis.longSentenceCount
+      suggestions: aiResult.humanizationSuggestions || aiToneAnalysis.suggestions
     },
-    realityCheck,
-    atsAnalysis,
-    githubVerification,
-    rawAi: aiResult
-  };
-}
-
-function compareResumes(analysisA, analysisB) {
-  const scoreA = analysisA.aiScore || analysisA.baseScore || 0;
-  const scoreB = analysisB.aiScore || analysisB.baseScore || 0;
-  const matchedA = Array.isArray(analysisA.matchedSkills) ? analysisA.matchedSkills : [];
-  const matchedB = Array.isArray(analysisB.matchedSkills) ? analysisB.matchedSkills : [];
-
-  return {
-    scoreDelta: scoreB - scoreA,
-    skillsDelta: {
-      added: matchedB.filter(s => !matchedA.includes(s)),
-      removed: matchedA.filter(s => !matchedB.includes(s)),
-    },
-    realityCheckDelta: {
-      scoreDelta: (analysisB.realityCheck?.score || 0) - (analysisA.realityCheck?.score || 0),
-      labelChange: analysisA.realityCheck?.label !== analysisB.realityCheck?.label
-    },
-    betterVersion: scoreB > scoreA ? 'B' : scoreA > scoreB ? 'A' : 'Equal',
-    rationale: scoreB > scoreA 
-      ? 'Version B has better alignment with job requirements and higher impact scores.' 
-      : scoreA > scoreB 
-        ? 'Version A maintains stronger technical depth and keyword coverage.'
-        : 'Both versions perform similarly across key metrics.'
+    learningRoadmap: aiResult.learningRoadmap || [],
+    interviewPreparation: aiResult.interviewPreparation || [],
+    mockInterviewQuestions: aiResult.mockInterviewQuestions || [],
+    // ML features
+    industryBenchmark: benchmarkResult,
+    percentileRank
   };
 }
 
 module.exports = {
-  analyzeResumeMatch,
-  compareResumes
+  analyzeResumeMatch
 };

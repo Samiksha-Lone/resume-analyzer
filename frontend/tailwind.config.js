@@ -8,7 +8,12 @@ export default {
   theme: {
     extend: {
       colors: {
-        accent: "#00BFFF",
+        accent: {
+          DEFAULT: "#00BFFF",
+          dark: "#0099CC",
+          light: "#33CCFF",
+          foreground: "#FFFFFF",
+        },
         background: {
           dark: "#1C1C1C",
           surface: "#262626",
@@ -21,7 +26,24 @@ export default {
         },
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
+        sans: ["Plus Jakarta Sans", "Inter", "system-ui", "sans-serif"],
+        display: ["Outfit", "sans-serif"],
+      },
+      animation: {
+        'pulse-slow': 'pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'bounce-slow': 'bounce 4s infinite',
+        'fade-in': 'fadeIn 1.2s ease-out forwards',
+        'silk-float': 'silkFloat 20s ease-in-out infinite alternate',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        silkFloat: {
+          '0%': { transform: 'translate(0, 0) scale(1)' },
+          '100%': { transform: 'translate(20px, 30px) scale(1.1)' },
+        },
       },
     },
   },

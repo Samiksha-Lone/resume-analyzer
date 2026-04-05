@@ -39,18 +39,6 @@ const Navbar = ({ onMenuClick }) => {
       </div>
 
       <div className="flex items-center gap-3">
-        <button 
-          onClick={toggleTheme}
-          className="p-2.5 rounded-xl hover:bg-stone-50 dark:hover:bg-white/5 transition-all group"
-        >
-          {theme === 'dark' ? (
-            <Sun className="w-5 h-5 text-stone-400 group-hover:text-amber-400 transition-colors" />
-          ) : (
-            <Moon className="w-5 h-5 text-stone-400 group-hover:text-indigo-400 transition-colors" />
-          )}
-        </button>
-        
-        <div className="w-px h-6 bg-stone-200 dark:bg-white/10 mx-2"></div>
 
         <div className="flex items-center gap-3 px-3 py-1.5 rounded-xl hover:bg-stone-50 dark:hover:bg-white/5 transition-all cursor-pointer group">
            <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center border border-accent/20">

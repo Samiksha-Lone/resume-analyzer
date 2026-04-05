@@ -4,7 +4,7 @@
 
 @layer base {
   * {
-    @apply border-stone-800/10 dark:border-stone-800/50;
+    @apply border-stone-200 dark:border-white/5;
   }
   
   body {
@@ -19,6 +19,47 @@
   
   .card-gradient {
     @apply bg-gradient-to-br from-white to-stone-50 dark:from-[#262626] dark:to-[#1C1C1C];
+  }
+
+  .premium-shadow {
+    @apply shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)];
+  }
+
+  @keyframes status-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
+  }
+
+  @keyframes mesh-flow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .animate-status-pulse {
+    animation: status-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .animate-mesh-flow {
+    background-size: 200% 200%;
+    animation: mesh-flow 15s ease infinite;
+  }
+
+  .premium-glass {
+    @apply backdrop-blur-[32px] bg-white/5 dark:bg-black/20 border border-white/10 dark:border-white/5 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)];
+  }
+
+  .text-gradient-liquid {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-accent via-cyan-400 to-accent;
+  }
+
+  .silk-blur {
+    @apply backdrop-blur-[20px] bg-white/40 dark:bg-[#1C1C1C]/40;
   }
 
   /* ByeWind specific utility classes */

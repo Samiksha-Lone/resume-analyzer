@@ -9,6 +9,7 @@ import {
   Sparkles, 
   ShieldCheck,
   Zap,
+  BrainCircuit,
   Activity,
   AlertCircle,
   Eye,
@@ -34,6 +35,34 @@ const Register = () => {
     if (isSubmitting) return;
 
     setError('');
+
+    // --- Client-side Validation ---
+    if (!name.trim()) {
+      setError('Please enter your full name.');
+      return;
+    }
+    if (name.trim().length < 2) {
+        setError('Name must be at least 2 characters long.');
+        return;
+      }
+
+    if (/\d/.test(name)) {
+      setError('Names should not contain numeric digits.');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Please provide a valid email address.');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long for security.');
+      return;
+    }
+    // ------------------------------
+
     setIsSubmitting(true);
 
     try {
@@ -58,20 +87,23 @@ const Register = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-6"
+          className="flex flex-col items-center text-center mb-6"
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-[10px] font-black uppercase tracking-tighter mb-4">
-            <Sparkles className="w-3 h-3" />
-            <span>Join the AI Career Engine</span>
-          </div>
+          <Link to="/" className="flex items-center gap-3 mb-4 group">
+             <div className="w-10 h-10 rounded-2xl bg-accent flex items-center justify-center shadow-lg shadow-accent/20 group-hover:scale-110 transition-transform">
+                <BrainCircuit className="w-6 h-6 text-white" />
+             </div>
+             <span className="text-xl font-black tracking-tighter dark:text-white">HIRE<span className="text-accent">METRIC</span></span>
+          </Link>
+          
           <h1 className="text-4xl font-black tracking-tighter dark:text-white leading-none">
             Member <span className="text-accent underline decoration-stone-800/30">Signup.</span>
           </h1>
         </motion.div>
 
         <Card className="bg-white/80 dark:bg-[#262626]/80 backdrop-blur-xl rounded-[32px] border border-stone-200 dark:border-white/5 overflow-hidden shadow-2xl shadow-black/10">
-          <CardContent className="p-8">
-            <form onSubmit={handleRegister} className="space-y-6">
+          <CardContent className="p-6 md:p-8">
+            <form onSubmit={handleRegister} className="space-y-4">
               {error && (
                 <motion.div 
                   initial={{ opacity: 0, x: -10 }}
@@ -83,7 +115,7 @@ const Register = () => {
                 </motion.div>
               )}
 
-              <div className="space-y-3.5">
+              <div className="space-y-2.5">
                 <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-4">Full Identity</label>
                   <div className="relative group">
@@ -158,7 +190,7 @@ const Register = () => {
               </div>
             </form>
 
-            <div className="mt-8 pt-4 border-t border-stone-100 dark:border-white/5 flex flex-col items-center gap-2">
+            <div className="mt-6 pt-4 border-t border-stone-100 dark:border-white/5 flex flex-col items-center gap-2">
               <p className="text-xs font-medium text-stone-500">Already a member?</p>
               <Link to="/login">
                 <Button variant="ghost" className="text-accent font-black text-[10px] uppercase tracking-widest hover:bg-accent/10 px-8 py-3 rounded-xl">

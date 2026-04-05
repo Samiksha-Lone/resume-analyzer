@@ -10,7 +10,7 @@ const DashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-slate-50 dark:bg-black transition-colors duration-300 relative overflow-hidden">
+    <div className="flex h-screen bg-background-light dark:bg-background-dark transition-colors duration-300 relative overflow-hidden">
       {/* Mobile Sidebar Overlay */}
       <AnimatePresence>
         {isSidebarOpen && (
@@ -23,7 +23,7 @@ const DashboardLayout = () => {
           />
         )}
       </AnimatePresence>
-
+ 
       {/* Sidebar Content */}
       <div className={`
         fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 lg:relative lg:translate-x-0
@@ -32,9 +32,9 @@ const DashboardLayout = () => {
         <Sidebar className="h-full" />
         <button 
           onClick={() => setIsSidebarOpen(false)}
-          className="absolute top-4 right-[-3rem] p-2 bg-white dark:bg-card-dark rounded-xl border border-slate-200 dark:border-slate-800 lg:hidden"
+          className="absolute top-4 right-[-3rem] p-2 bg-white dark:bg-card-dark rounded-xl border border-stone-200 dark:border-white/5 lg:hidden"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5 text-stone-900 dark:text-white" />
         </button>
       </div>
       

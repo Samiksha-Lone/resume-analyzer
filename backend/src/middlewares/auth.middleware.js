@@ -20,16 +20,14 @@ const protect = async (req, res, next) => {
         throw new ApiError(401, 'User not found, not authorized');
       }
 
-      next();
+      return next();
     } catch (error) {
       console.error(error);
-      next(new ApiError(401, 'Not authorized, token failed'));
+      return next(new ApiError(401, 'Not authorized, token failed'));
     }
   }
 
-  if (!token) {
-    next(new ApiError(401, 'Not authorized, no token'));
-  }
+  return next(new ApiError(401, 'Not authorized, no token'));
 };
 
 module.exports = { protect };

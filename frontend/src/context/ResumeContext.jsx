@@ -7,6 +7,7 @@ export const ResumeProvider = ({ children }) => {
   const [currentResume, setCurrentResume] = useState(null);
   const [analysisResults, setAnalysisResults] = useState(null);
   const [history, setHistory] = useState([]);
+  const [analysisHistory, setAnalysisHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const { api } = useAuth();
@@ -19,7 +20,7 @@ export const ResumeProvider = ({ children }) => {
       formData.append('resume', file);
       
       const response = await api.post('/resumes', formData);
-      const data = response.data;
+      const data = response.data?.data || response.data;
       setCurrentResume(data);
       return data;
     } catch (err) {
@@ -30,17 +31,53 @@ export const ResumeProvider = ({ children }) => {
     }
   };
 
-  const analyzeResume = async (resumeId, jobDescription, githubUsername) => {
+  const deleteHistoryItem = async (id) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      await api.delete(`/resumes/${id}`);
+      setHistory(prev => prev.filter(item => item._id !== id));
+      return { success: true };
+    } catch (err) {
+      const errorMsg = err.response?.data?.error || 'Error deleting history item';
+      setError(errorMsg);
+      throw new Error(errorMsg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const analyzeResume = async (resumeId, jobDescription, jobTitle = '', targetSkills = []) => {
     setIsLoading(true);
     setError(null);
     try {
       const response = await api.post(`/resumes/${resumeId}/analyze`, {
         jobDescription,
-        githubUsername
+        jobTitle,
+        targetSkills
       });
-      return response.data; // Returns { jobId, status }
+      return response.data?.data || response.data; // Returns { jobId, status }
     } catch (err) {
       setError(err.response?.data?.error || 'Error initiating analysis');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const matchResume = async (resumeId, jobDescription, jobTitle = '', targetSkills = []) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await api.post(`/resumes/${resumeId}/match`, {
+        jobDescription,
+        jobTitle,
+        targetSkills
+      });
+      const result = response.data?.data?.match || response.data?.match || response.data?.data;
+      return result;
+    } catch (err) {
+      setError(err.response?.data?.error || 'Error matching resume');
       throw err;
     } finally {
       setIsLoading(false);
@@ -50,7 +87,7 @@ export const ResumeProvider = ({ children }) => {
   const fetchAnalysisStatus = async (jobId) => {
     try {
       const response = await api.get(`/analysis/status/${jobId}`);
-      return response.data || { status: 'failed', error: 'Empty status response' };
+      return response.data?.data || response.data || { status: 'failed', error: 'Empty status response' };
     } catch (err) {
       console.error("Status check failed:", err);
       return { status: 'failed', error: err.response?.data?.error || err.message || 'Analysis status unavailable' };
@@ -62,21 +99,43 @@ export const ResumeProvider = ({ children }) => {
     setError(null);
     try {
       const response = await api.get('/resumes');
-      const data = response.data;
-      setHistory(data);
+      const data = response.data?.data?.resumes || response.data?.resumes || response.data || [];
+      setHistory(Array.isArray(data) ? data : []);
     } catch (err) {
       setError(err.response?.data?.error || 'Error fetching history');
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [api]);
+
+  const fetchAnalysisHistory = useCallback(async () => {
+    try {
+      const response = await api.get('/history');
+      const entries = response.data?.data?.history || response.data?.history || [];
+      setAnalysisHistory(Array.isArray(entries) ? entries : []);
+      return entries;
+    } catch (err) {
+      console.error('Failed to fetch analysis history:', err);
+      return [];
+    }
+  }, [api]);
+
+  const compareAnalysisHistory = async (v1, v2) => {
+    try {
+      const response = await api.get('/history/compare', { params: { v1, v2 } });
+      return response.data?.data || response.data;
+    } catch (err) {
+      console.error('Failed to compare history:', err);
+      throw err;
+    }
+  };
 
   const getResumeById = async (id) => {
     setIsLoading(true);
     setError(null);
     try {
       const response = await api.get(`/resumes/${id}`);
-      const data = response.data;
+      const data = response.data?.data?.resume || response.data?.resume || response.data;
       setCurrentResume(data);
       if (data.analysis) {
         setAnalysisResults(data.analysis);
@@ -90,33 +149,24 @@ export const ResumeProvider = ({ children }) => {
     }
   };
 
-  const compareResumes = async (idA, idB) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await api.post('/resumes/compare', { idA, idB });
-      return response.data;
-    } catch (err) {
-      setError(err.response?.data?.error || 'Error comparing resumes');
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <ResumeContext.Provider value={{
       currentResume,
       analysisResults,
       history,
+      analysisHistory,
       isLoading,
       error,
       uploadResume,
       analyzeResume,
       fetchHistory,
+      fetchAnalysisHistory,
+      compareAnalysisHistory,
       getResumeById,
-      compareResumes,
+      deleteHistoryItem,
       fetchAnalysisStatus,
+      matchResume,
       setAnalysisResults,
       setCurrentResume
     }}>

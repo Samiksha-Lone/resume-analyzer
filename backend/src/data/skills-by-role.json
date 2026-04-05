@@ -1,0 +1,82 @@
+{
+  "frontend developer": {
+    "skills": ["html", "css", "javascript", "typescript", "react", "vue", "angular", "nextjs", "redux", "tailwind", "sass", "webpack", "vite", "jest", "testing-library", "figma", "responsive design", "accessibility", "web performance", "graphql", "rest api", "git", "npm", "yarn", "storybook"],
+    "weights": [0.6, 0.6, 1.0, 0.9, 1.0, 0.7, 0.7, 0.9, 0.8, 0.8, 0.6, 0.7, 0.7, 0.7, 0.7, 0.5, 0.8, 0.6, 0.7, 0.6, 0.8, 0.9, 0.7, 0.7, 0.6]
+  },
+  "backend developer": {
+    "skills": ["nodejs", "python", "java", "go", "express", "fastapi", "django", "spring", "rest api", "graphql", "mongodb", "postgresql", "mysql", "redis", "docker", "kubernetes", "aws", "authentication", "jwt", "oauth", "microservices", "ci/cd", "git", "linux", "testing"],
+    "weights": [1.0, 0.9, 0.8, 0.7, 1.0, 0.7, 0.7, 0.6, 1.0, 0.7, 0.9, 0.9, 0.8, 0.8, 0.9, 0.8, 0.8, 0.9, 0.9, 0.8, 0.8, 0.8, 0.9, 0.7, 0.8]
+  },
+  "full stack developer": {
+    "skills": ["javascript", "typescript", "react", "nodejs", "express", "mongodb", "postgresql", "rest api", "graphql", "docker", "git", "aws", "nextjs", "redux", "jwt", "authentication", "ci/cd", "testing", "html", "css", "tailwind", "linux", "microservices", "redis", "webpack"],
+    "weights": [1.0, 0.9, 1.0, 1.0, 0.9, 0.8, 0.8, 1.0, 0.7, 0.8, 0.9, 0.7, 0.8, 0.7, 0.8, 0.8, 0.7, 0.8, 0.7, 0.7, 0.7, 0.6, 0.7, 0.7, 0.6]
+  },
+  "data scientist": {
+    "skills": ["python", "machine learning", "deep learning", "tensorflow", "pytorch", "scikit-learn", "pandas", "numpy", "matplotlib", "sql", "statistics", "r", "jupyter", "data visualization", "nlp", "computer vision", "feature engineering", "model deployment", "mlflow", "experiment tracking", "tableau", "power bi", "big data", "spark", "hadoop"],
+    "weights": [1.0, 1.0, 0.9, 0.8, 0.8, 1.0, 1.0, 1.0, 0.8, 0.9, 1.0, 0.7, 0.8, 0.8, 0.8, 0.7, 0.9, 0.8, 0.7, 0.7, 0.7, 0.6, 0.7, 0.7, 0.6]
+  },
+  "machine learning engineer": {
+    "skills": ["python", "machine learning", "deep learning", "tensorflow", "pytorch", "scikit-learn", "mlops", "model deployment", "docker", "kubernetes", "aws", "mlflow", "fastapi", "data pipelines", "feature engineering", "distributed training", "cuda", "transformers", "nlp", "computer vision", "pyspark", "airflow", "monitoring", "a/b testing", "experiment tracking"],
+    "weights": [1.0, 1.0, 1.0, 0.9, 0.9, 0.9, 1.0, 1.0, 0.9, 0.8, 0.8, 0.9, 0.8, 0.9, 0.9, 0.8, 0.7, 0.8, 0.8, 0.8, 0.7, 0.7, 0.8, 0.7, 0.9]
+  },
+  "devops engineer": {
+    "skills": ["docker", "kubernetes", "aws", "azure", "gcp", "terraform", "ansible", "jenkins", "ci/cd", "linux", "bash", "python", "monitoring", "prometheus", "grafana", "nginx", "git", "helm", "microservices", "networking", "security", "load balancing", "logging", "elk stack", "cloud"],
+    "weights": [1.0, 1.0, 1.0, 0.8, 0.8, 0.9, 0.8, 0.8, 1.0, 1.0, 0.9, 0.7, 0.9, 0.8, 0.8, 0.7, 0.9, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.7, 0.9]
+  },
+  "cloud engineer": {
+    "skills": ["aws", "azure", "gcp", "terraform", "kubernetes", "docker", "networking", "security", "iam", "serverless", "lambda", "s3", "ec2", "rds", "cloudformation", "ci/cd", "linux", "python", "monitoring", "cost optimization", "microservices", "load balancing", "cdn", "api gateway", "devops"],
+    "weights": [1.0, 0.9, 0.9, 1.0, 0.9, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.7, 0.8, 0.8, 0.8, 0.7, 0.8, 0.7, 0.8, 0.8, 0.7, 0.7, 0.9]
+  },
+  "mobile developer": {
+    "skills": ["react native", "flutter", "ios", "android", "swift", "kotlin", "dart", "javascript", "typescript", "firebase", "rest api", "graphql", "push notifications", "app store", "play store", "performance optimization", "testing", "ci/cd", "git", "ui/ux", "state management", "offline support", "redux", "native modules", "animations"],
+    "weights": [1.0, 1.0, 0.8, 0.8, 0.8, 0.8, 0.8, 0.9, 0.9, 0.8, 0.9, 0.7, 0.7, 0.7, 0.7, 0.8, 0.7, 0.7, 0.8, 0.7, 0.8, 0.6, 0.7, 0.6, 0.7]
+  },
+  "ios developer": {
+    "skills": ["swift", "objective-c", "xcode", "swiftui", "uikit", "core data", "combine", "concurrency", "rest api", "firebase", "testing", "ci/cd", "app store", "design patterns", "mvvm", "clean architecture", "performance", "animations", "push notifications", "in-app purchases", "localization", "accessibility", "metal", "arkit", "coreml"],
+    "weights": [1.0, 0.7, 1.0, 0.9, 0.9, 0.8, 0.8, 0.8, 0.8, 0.7, 0.8, 0.7, 0.8, 0.9, 0.9, 0.8, 0.8, 0.8, 0.7, 0.6, 0.6, 0.6, 0.5, 0.5, 0.5]
+  },
+  "android developer": {
+    "skills": ["kotlin", "java", "android studio", "jetpack compose", "android sdk", "mvvm", "room database", "retrofit", "coroutines", "hilt", "testing", "ci/cd", "play store", "material design", "rest api", "firebase", "performance", "animations", "push notifications", "navigation", "viewmodel", "livedata", "architecture components", "gradle", "proguard"],
+    "weights": [1.0, 0.8, 1.0, 0.9, 1.0, 0.9, 0.8, 0.8, 0.9, 0.8, 0.8, 0.7, 0.7, 0.8, 0.9, 0.7, 0.8, 0.7, 0.7, 0.8, 0.9, 0.8, 0.9, 0.8, 0.7]
+  },
+  "react developer": {
+    "skills": ["react", "javascript", "typescript", "hooks", "redux", "nextjs", "react query", "testing-library", "jest", "css", "tailwind", "rest api", "graphql", "performance optimization", "webpack", "vite", "git", "state management", "context api", "server side rendering", "static site generation", "accessibility", "storybook", "framer motion", "html"],
+    "weights": [1.0, 1.0, 0.9, 0.9, 0.9, 0.8, 0.8, 0.8, 0.8, 0.8, 0.7, 0.9, 0.7, 0.8, 0.7, 0.7, 0.9, 0.9, 0.8, 0.7, 0.7, 0.6, 0.6, 0.7, 0.7]
+  },
+  "node developer": {
+    "skills": ["nodejs", "javascript", "typescript", "express", "fastify", "nestjs", "rest api", "graphql", "mongodb", "postgresql", "redis", "docker", "authentication", "jwt", "testing", "ci/cd", "microservices", "message queues", "websockets", "aws", "performance", "security", "logging", "monitoring", "git"],
+    "weights": [1.0, 1.0, 0.8, 1.0, 0.7, 0.7, 1.0, 0.7, 0.8, 0.8, 0.8, 0.8, 0.9, 0.9, 0.8, 0.7, 0.8, 0.7, 0.7, 0.7, 0.8, 0.8, 0.7, 0.7, 0.9]
+  },
+  "python developer": {
+    "skills": ["python", "django", "fastapi", "flask", "rest api", "celery", "postgresql", "redis", "docker", "testing", "git", "aws", "linux", "sqlalchemy", "asyncio", "type hints", "pytest", "ci/cd", "microservices", "message queues", "graphql", "websockets", "security", "performance", "monitoring"],
+    "weights": [1.0, 0.9, 0.8, 0.8, 1.0, 0.8, 0.8, 0.8, 0.8, 0.9, 0.9, 0.7, 0.7, 0.8, 0.7, 0.8, 0.9, 0.7, 0.7, 0.7, 0.6, 0.6, 0.7, 0.7, 0.7]
+  },
+  "software engineer": {
+    "skills": ["algorithms", "data structures", "system design", "object oriented programming", "design patterns", "git", "testing", "ci/cd", "docker", "aws", "rest api", "databases", "sql", "performance", "code review", "agile", "communication", "problem solving", "debugging", "linux", "security", "microservices", "distributed systems", "scalability", "monitoring"],
+    "weights": [1.0, 1.0, 1.0, 1.0, 0.9, 0.9, 0.9, 0.8, 0.8, 0.7, 0.9, 0.9, 0.9, 0.8, 0.9, 0.8, 0.7, 1.0, 0.9, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7]
+  },
+  "ui ux designer": {
+    "skills": ["figma", "sketch", "adobe xd", "user research", "wireframing", "prototyping", "design systems", "usability testing", "information architecture", "visual design", "typography", "color theory", "accessibility", "interaction design", "motion design", "html", "css", "responsive design", "user flows", "personas", "a/b testing", "design thinking", "agile", "stakeholder management", "data-driven design"],
+    "weights": [1.0, 0.8, 0.8, 1.0, 1.0, 1.0, 0.9, 0.9, 0.9, 1.0, 0.8, 0.8, 0.8, 0.9, 0.8, 0.6, 0.6, 0.8, 0.9, 0.8, 0.8, 0.9, 0.7, 0.7, 0.8]
+  },
+  "product manager": {
+    "skills": ["product roadmap", "user stories", "agile", "scrum", "stakeholder management", "data analysis", "a/b testing", "market research", "customer discovery", "prioritization", "kpis", "product strategy", "go-to-market", "jira", "confluence", "sql", "analytics", "communication", "cross-functional", "competitive analysis", "mvp", "OKRs", "product metrics", "user research", "risk management"],
+    "weights": [1.0, 1.0, 0.9, 0.9, 1.0, 0.9, 0.9, 0.9, 0.9, 1.0, 0.9, 1.0, 0.8, 0.8, 0.8, 0.7, 0.9, 1.0, 0.9, 0.8, 0.9, 0.8, 0.9, 0.9, 0.8]
+  },
+  "data engineer": {
+    "skills": ["python", "sql", "spark", "hadoop", "airflow", "kafka", "dbt", "aws", "data pipelines", "etl", "data warehouse", "snowflake", "bigquery", "redshift", "docker", "kubernetes", "git", "data modeling", "streaming", "batch processing", "postgresql", "mongodb", "elasticsearch", "monitoring", "data quality"],
+    "weights": [1.0, 1.0, 1.0, 0.8, 0.9, 0.9, 0.9, 0.8, 1.0, 1.0, 1.0, 0.8, 0.8, 0.8, 0.8, 0.7, 0.8, 0.9, 0.9, 0.9, 0.8, 0.7, 0.7, 0.7, 0.9]
+  },
+  "cybersecurity engineer": {
+    "skills": ["network security", "penetration testing", "vulnerability assessment", "siem", "firewalls", "iam", "encryption", "incident response", "threat analysis", "soc", "python", "linux", "cloud security", "compliance", "risk assessment", "zero trust", "authentication", "owasp", "forensics", "malware analysis", "scripting", "docker security", "devsecops", "aws security", "monitoring"],
+    "weights": [1.0, 0.9, 0.9, 0.8, 0.8, 0.8, 0.9, 0.9, 0.9, 0.8, 0.7, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.7, 0.7, 0.8, 0.7, 0.8, 0.8, 0.8]
+  },
+  "blockchain developer": {
+    "skills": ["solidity", "ethereum", "web3", "smart contracts", "truffle", "hardhat", "defi", "nft", "javascript", "typescript", "rust", "go", "cryptography", "consensus mechanisms", "ipfs", "layer 2", "testing", "security auditing", "react", "nodejs", "metamask", "polygon", "chainlink", "governance", "tokenomics"],
+    "weights": [1.0, 1.0, 0.9, 1.0, 0.8, 0.8, 0.8, 0.7, 0.9, 0.8, 0.7, 0.7, 0.8, 0.8, 0.7, 0.7, 0.8, 0.8, 0.7, 0.7, 0.7, 0.7, 0.6, 0.6, 0.6]
+  },
+  "qa engineer": {
+    "skills": ["testing", "selenium", "cypress", "playwright", "jest", "pytest", "test automation", "api testing", "postman", "bug tracking", "jira", "test planning", "regression testing", "performance testing", "ci/cd", "git", "agile", "python", "javascript", "load testing", "mobile testing", "security testing", "database testing", "documentation", "test driven development"],
+    "weights": [1.0, 0.9, 0.9, 0.8, 0.8, 0.8, 1.0, 0.9, 0.8, 0.9, 0.8, 0.9, 0.9, 0.8, 0.8, 0.8, 0.8, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.8, 0.8]
+  }
+}
