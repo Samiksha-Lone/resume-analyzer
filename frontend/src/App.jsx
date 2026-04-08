@@ -1,3 +1,37 @@
+/**
+ * Main Application Component
+ *
+ * Defines the routing structure for the Resume Analyzer application.
+ * Uses React Router to handle client-side navigation between different pages.
+ *
+ * Route Structure:
+ * - / (Landing) - Public marketing page
+ * - /login - User authentication
+ * - /signup - User registration
+ * - /dashboard - Main dashboard (protected)
+ * - /analyze - Resume upload and analysis (protected)
+ * - /results - Analysis results display (protected)
+ * - /history - Analysis history viewer (protected)
+ * - /editor - Resume editor interface (protected)
+ *
+ * Protected routes are wrapped with ProtectedRoute component that
+ * checks authentication status and redirects to login if needed.
+ *
+ * @module App
+ * @requires react
+ * @requires react-router-dom
+ * @requires ./components/layout/DashboardLayout
+ * @requires ./pages/AnalyzeResume
+ * @requires ./pages/ResultsDashboard
+ * @requires ./pages/History
+ * @requires ./pages/Login
+ * @requires ./pages/Register
+ * @requires ./components/auth/ProtectedRoute
+ * @requires ./pages/ResumeEditor
+ * @requires ./pages/Landing
+ * @requires ./pages/Dashboard
+ */
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import DashboardLayout from './components/layout/DashboardLayout';
@@ -11,6 +45,14 @@ import ResumeEditor from './pages/ResumeEditor';
 import Landing from './pages/Landing';
 import Dashboard from './pages/Dashboard';
 
+/**
+ * Application Component
+ *
+ * The root component that defines all application routes.
+ * Uses nested routing with layout components for consistent UI structure.
+ *
+ * @returns {JSX.Element} The router configuration with all routes
+ */
 function App() {
   return (
     <Router>

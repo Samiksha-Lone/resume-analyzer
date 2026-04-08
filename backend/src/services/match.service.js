@@ -1,35 +1,86 @@
+/**
+ * Resume Matching Service
+ *
+ * Core service for analyzing resume-job description compatibility.
+ * Implements multiple algorithms for comprehensive resume evaluation:
+ *
+ * 1. Keyword-based matching using TF-IDF and tokenization
+ * 2. ATS compatibility scoring
+ * 3. Reality check analysis (AI detection, impact measurement)
+ * 4. Industry benchmark comparison
+ * 5. Percentile ranking against user pool
+ *
+ * The service combines traditional NLP techniques with AI-powered analysis
+ * to provide detailed feedback on resume quality and job fit.
+ *
+ * @module services/match
+ * @requires ./ai.service
+ * @requires ./benchmark.service
+ * @requires ./percentile.service
+ */
+
 const { analyzeMatchWithOllama } = require('./ai.service');
 const { analyzeIndustryBenchmark } = require('./benchmark.service');
 const { pushAndRank } = require('./percentile.service');
 
+/**
+ * Stopwords to filter out during tokenization
+ * Common English words that don't provide meaningful skill information
+ * @type {Set<string>}
+ */
 const stopwords = new Set([
   'and', 'or', 'the', 'a', 'an', 'to', 'for', 'of', 'in', 'on', 'with', 'by', 'from',
   'that', 'this', 'is', 'are', 'as', 'at', 'be', 'have', 'has', 'had', 'will', 'would',
   'should', 'can', 'may', 'must', 'if', 'else', 'about', 'it', 'its', 'which', 'their'
 ]);
 
+/**
+ * High-impact action verbs that indicate strong resume content
+ * Used in reality check scoring to measure accomplishment-oriented language
+ * @type {string[]}
+ */
 const impactWords = [
   'increased', 'decreased', 'improved', 'optimized', 'scaled', 'built', 'launched',
   'spearheaded', 'accelerated', 'generated', 'created', 'delivered', 'reduced', 'saved',
   'automated', 'streamlined', 'transformed', 'expanded', 'negotiated', 'led', 'architected'
 ];
 
+/**
+ * Technical project depth indicators
+ * Words that suggest hands-on technical work and ownership
+ * @type {string[]}
+ */
 const projectDepthIndicators = [
   'architected', 'designed', 'launched', 'scaled', 'automated', 'optimized', 'integrated',
   'migrated', 'orchestrated', 'modeled', 'analyzed', 'built', 'deployed', 'mentored', 'owned'
 ];
 
+/**
+ * Generic resume buzzwords to avoid
+ * Overused phrases that suggest template-like content
+ * @type {string[]}
+ */
 const genericBuzzwords = [
   'hardworking', 'team player', 'detail-oriented', 'self-motivated', 'self starter',
   'fast learner', 'good communication', 'excellent communication', 'results-driven',
   'problem solver', 'responsible for', 'worked on', 'helped', 'assisted', 'tasked with'
 ];
 
+/**
+ * Generic CRUD operation phrases
+ * Basic operational language that lacks impact
+ * @type {string[]}
+ */
 const genericCrudPhrases = [
   'crud', 'basic operations', 'simple application', 'maintenance', 'support', 'daily tasks',
   'assisting with', 'working with', 'helping with', 'supporting the team'
 ];
 
+/**
+ * Advanced technical indicators
+ * Technologies and concepts that suggest senior-level experience
+ * @type {string[]}
+ */
 const advancedProjectIndicators = [
   'jwt', 'oauth', 'authentication', 'authorization', 'api integration', 'rest api', 'graphql',
   'microservices', 'docker', 'kubernetes', 'ci/cd', 'load balancing', 'caching', 'cloud',
@@ -37,6 +88,11 @@ const advancedProjectIndicators = [
   'deployment', 'multi-tenant', 'distributed', 'third-party api', 'real-world', 'customer-facing'
 ];
 
+/**
+ * AI-generated content indicators
+ * Phrases commonly found in AI-generated resumes
+ * @type {string[]}
+ */
 const aiToneIndicators = [
   'proven track record', 'passionate', 'experienced', 'results-driven', 'highly motivated',
   'detail oriented', 'excellent communication', 'team player', 'strong work ethic',
@@ -194,6 +250,58 @@ function computeRealityCheck(text) {
   };
 }
 
+/**
+ * Comprehensive Resume-Job Matching Analysis
+ *
+ * Performs multi-layered analysis of resume compatibility with job description.
+ * Combines multiple scoring algorithms to provide detailed feedback.
+ *
+ * Analysis Components:
+ * 1. **Keyword Matching**: TF-IDF based skill extraction and matching
+ * 2. **AI Analysis**: Semantic understanding using Ollama LLM
+ * 3. **Reality Check**: Evaluates resume authenticity and impact
+ * 4. **Industry Benchmark**: Compares against industry standards
+ * 5. **Percentile Ranking**: Relative performance against user pool
+ *
+ * Scoring Metrics:
+ * - jobMatchScore: How well resume matches job requirements (0-100)
+ * - readinessScore: Overall resume quality and market readiness (0-100)
+ * - realityScore: Authenticity and impact measurement (0-100)
+ * - authenticityScore: Human-like content vs AI-generated (0-100)
+ *
+ * @async
+ * @function analyzeResumeMatch
+ * @param {Object} params - Analysis parameters
+ * @param {string} params.resumeText - Full text content of resume
+ * @param {string} params.jobDescription - Job description text
+ * @param {string} [params.jobTitle] - Target job title for context
+ * @param {string[]} [params.targetSkills] - Specific skills to prioritize
+ * @returns {Promise<Object>} Comprehensive analysis results
+ *
+ * @property {number} jobMatchScore - Job-resume compatibility score
+ * @property {number} readinessScore - Overall resume quality score
+ * @property {string[]} matchedSkills - Skills found in both resume and job
+ * @property {string[]} skillGaps - Required skills missing from resume
+ * @property {string} summary - AI-generated analysis summary
+ * @property {string[]} recommendations - Actionable improvement suggestions
+ * @property {Object} realityCheck - Authenticity and impact analysis
+ * @property {Object} aiToneAnalysis - AI-generated content detection
+ * @property {Object} [industryBenchmark] - Industry comparison data
+ * @property {Object} [percentileRank] - Relative performance metrics
+ *
+ * @example
+ * ```javascript
+ * const result = await analyzeResumeMatch({
+ *   resumeText: "Full resume content...",
+ *   jobDescription: "Software Engineer role...",
+ *   jobTitle: "Senior Software Engineer",
+ *   targetSkills: ["React", "Node.js", "AWS"]
+ * });
+ *
+ * console.log(`Match Score: ${result.jobMatchScore}%`);
+ * console.log(`Skill Gaps: ${result.skillGaps.join(', ')}`);
+ * ```
+ */
 async function analyzeResumeMatch({ resumeText, jobDescription, jobTitle, targetSkills = [] }) {
   const normalizedResume = normalize(resumeText);
   const normalizedJD = normalize(jobDescription);

@@ -1,11 +1,56 @@
+/**
+ * AI Service Module
+ *
+ * Provides integration with both Ollama (local) and OpenAI (cloud) AI for text generation and analysis.
+ * Handles resume-job matching analysis with configurable AI provider.
+ *
+ * Key Features:
+ * - Dual AI provider support (Ollama + OpenAI)
+ * - Automatic fallback from local to cloud
+ * - Text generation and JSON parsing
+ * - Resume-job matching analysis
+ * - Connection testing and error handling
+ *
+ * Environment Variables:
+ * - AI_PROVIDER: 'ollama' or 'openai' (default: 'ollama')
+ * - OLLAMA_HOST: Ollama server URL (default: http://127.0.0.1:11434)
+ * - OLLAMA_MODEL: Ollama model name (default: gpt-oss:120b-cloud)
+ * - OPENAI_API_KEY: OpenAI API key (required for OpenAI)
+ * - OPENAI_MODEL: OpenAI model name (default: gpt-4o-mini)
+ *
+ * @module services/ai
+ * @requires ollama
+ * @requires openai
+ * @requires ../utils/apiResponse
+ */
+
 const { Ollama } = require('ollama');
+const OpenAI = require('openai');
 const { ApiError } = require('../utils/apiResponse');
 
-// Initialize Ollama client with configuration
+/**
+ * AI provider configuration
+ * @type {string}
+ */
+const AI_PROVIDER = process.env.AI_PROVIDER || 'ollama';
+
+/**
+ * Ollama configuration
+ */
 const OLLAMA_HOST = process.env.OLLAMA_HOST || process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434';
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'gpt-oss:120b-cloud';
 
+/**
+ * OpenAI configuration
+ */
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+
+/**
+ * Global AI client instances
+ */
 let ollamaClient = null;
+let openaiClient = null;
 
 /**
  * Get or create Ollama client instance
@@ -20,29 +65,58 @@ function getOllamaClient() {
         timeout: 30000 // 30 second timeout
       });
     } catch (error) {
-      throw new ApiError(500, `Failed to initialize AI client: ${error.message}`);
+      throw new ApiError(500, `Failed to initialize Ollama client: ${error.message}`);
     }
   }
   return ollamaClient;
 }
 
 /**
- * Test Ollama connection and model availability
+ * Get or create OpenAI client instance
+ * @returns {OpenAI} OpenAI client instance
+ * @throws {ApiError} If client cannot be initialized
+ */
+function getOpenAIClient() {
+  if (!openaiClient) {
+    if (!OPENAI_API_KEY) {
+      throw new ApiError(500, 'OpenAI API key not configured. Set OPENAI_API_KEY environment variable.');
+    }
+    try {
+      openaiClient = new OpenAI({
+        apiKey: OPENAI_API_KEY,
+        timeout: 30000 // 30 second timeout
+      });
+    } catch (error) {
+      throw new ApiError(500, `Failed to initialize OpenAI client: ${error.message}`);
+    }
+  }
+  return openaiClient;
+}
+
+/**
+ * Test AI provider connection and availability
  * @returns {Promise<boolean>} True if connection is working
  */
-async function testOllamaConnection() {
+async function testAIConnection() {
   try {
-    const client = getOllamaClient();
-    await client.list();
-    return true;
+    if (AI_PROVIDER === 'openai') {
+      const client = getOpenAIClient();
+      await client.models.list();
+      return true;
+    } else {
+      // Default to Ollama
+      const client = getOllamaClient();
+      await client.list();
+      return true;
+    }
   } catch (error) {
-    console.warn('Ollama connection test failed:', error.message);
+    console.warn(`${AI_PROVIDER} connection test failed:`, error.message);
     return false;
   }
 }
 
 /**
- * Generate text using Ollama AI
+ * Generate text using configured AI provider
  * @param {string} prompt - Text prompt for AI generation
  * @param {Object} options - Additional generation options
  * @returns {Promise<string>} Generated text response
@@ -58,54 +132,97 @@ async function generateText(prompt, options = {}) {
   }
 
   try {
-    const client = getOllamaClient();
-
-    const generationOptions = {
-      model: OLLAMA_MODEL,
-      prompt: prompt.trim(),
-      temperature: 0.2,
-      top_p: 0.9,
-      num_predict: 1000, // Limit response length
-      ...options
-    };
-
-    const response = await client.generate(generationOptions);
-
-    if (!response || typeof response.response !== 'string') {
-      throw new Error('Invalid or empty response from AI service');
+    if (AI_PROVIDER === 'openai') {
+      return await generateTextWithOpenAI(prompt, options);
+    } else {
+      // Default to Ollama
+      return await generateTextWithOllama(prompt, options);
     }
-
-    const cleanedResponse = response.response.trim();
-    if (cleanedResponse.length === 0) {
-      throw new Error('AI service returned empty response');
-    }
-
-    return cleanedResponse;
-
   } catch (error) {
-    // Handle specific Ollama errors
-    if (error.message?.includes('connect ECONNREFUSED')) {
-      throw new ApiError(503, 'AI service is currently unavailable. Please ensure Ollama is running and accessible');
+    // If primary provider fails and it's Ollama, try OpenAI as fallback
+    if (AI_PROVIDER === 'ollama' && OPENAI_API_KEY) {
+      console.warn('Ollama failed, falling back to OpenAI:', error.message);
+      try {
+        return await generateTextWithOpenAI(prompt, options);
+      } catch (fallbackError) {
+        console.error('OpenAI fallback also failed:', fallbackError.message);
+      }
     }
 
-    if (error.message?.includes('model not found') || error.message?.includes('model not available')) {
-      throw new ApiError(503, `AI model '${OLLAMA_MODEL}' is not available. Please ensure the model is installed in Ollama`);
-    }
-
-    if (error.code === 'ETIMEDOUT' || error.message?.includes('timeout')) {
-      throw new ApiError(504, 'AI service request timed out. Please try again');
-    }
-
-    // Log the original error for debugging
-    console.error('AI generation error:', {
-      message: error.message,
-      promptLength: prompt.length,
-      model: OLLAMA_MODEL,
-      host: OLLAMA_HOST
-    });
-
-    throw new ApiError(500, `AI generation failed: ${error.message}`);
+    throw error;
   }
+}
+
+/**
+ * Generate text using Ollama
+ * @param {string} prompt - Text prompt
+ * @param {Object} options - Generation options
+ * @returns {Promise<string>} Generated text
+ * @throws {ApiError} If generation fails
+ */
+async function generateTextWithOllama(prompt, options = {}) {
+  const client = getOllamaClient();
+
+  const generationOptions = {
+    model: OLLAMA_MODEL,
+    prompt: prompt.trim(),
+    temperature: 0.2,
+    top_p: 0.9,
+    num_predict: 1000, // Limit response length
+    ...options
+  };
+
+  const response = await client.generate(generationOptions);
+
+  if (!response || typeof response.response !== 'string') {
+    throw new Error('Invalid or empty response from Ollama');
+  }
+
+  const cleanedResponse = response.response.trim();
+  if (cleanedResponse.length === 0) {
+    throw new Error('Ollama returned empty response');
+  }
+
+  return cleanedResponse;
+}
+
+/**
+ * Generate text using OpenAI
+ * @param {string} prompt - Text prompt
+ * @param {Object} options - Generation options
+ * @returns {Promise<string>} Generated text
+ * @throws {ApiError} If generation fails
+ */
+async function generateTextWithOpenAI(prompt, options = {}) {
+  const client = getOpenAIClient();
+
+  const messages = [
+    {
+      role: 'user',
+      content: prompt.trim()
+    }
+  ];
+
+  const completionOptions = {
+    model: OPENAI_MODEL,
+    messages,
+    temperature: 0.2,
+    max_tokens: 1000, // Limit response length
+    ...options
+  };
+
+  const response = await client.chat.completions.create(completionOptions);
+
+  if (!response || !response.choices || !response.choices[0] || !response.choices[0].message) {
+    throw new Error('Invalid response from OpenAI');
+  }
+
+  const content = response.choices[0].message.content;
+  if (!content || content.trim().length === 0) {
+    throw new Error('OpenAI returned empty response');
+  }
+
+  return content.trim();
 }
 
 /**
@@ -202,13 +319,6 @@ function parseJsonResponse(raw) {
   }
 }
 
-module.exports = {
-  generateText,
-  parseJsonResponse,
-  testOllamaConnection,
-  getOllamaClient
-};
-
 async function analyzeMatchWithOllama({ resumeText, jobDescription, jobTitle, targetSkills }) {
   const resumePreview = resumeText.length > 2500 ? `${resumeText.slice(0, 2500)}\n...[truncated]` : resumeText;
   const jdPreview = jobDescription.length > 2500 ? `${jobDescription.slice(0, 2500)}\n...[truncated]` : jobDescription;
@@ -277,5 +387,10 @@ Focus on depth and clarity. Only return JSON. No additional text.`;
 }
 
 module.exports = {
+  generateText,
+  parseJsonResponse,
+  testAIConnection,
+  getOllamaClient,
+  getOpenAIClient,
   analyzeMatchWithOllama
 };
