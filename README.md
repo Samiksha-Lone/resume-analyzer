@@ -9,110 +9,40 @@ AI-powered resume analysis tool that evaluates resumes against job descriptions,
 
 ## 📋 Problem Statement
 
-In today's competitive job market, job seekers face significant challenges in optimizing their resumes. Traditional resume advice is often generic and vague, focusing on superficial changes like "use strong verbs" without addressing core issues. Many candidates struggle with:
-
-- Understanding how Applicant Tracking Systems (ATS) parse and score resumes
-- Identifying specific skill gaps compared to job requirements
-- Measuring the authenticity and impact of their resume content
-- Tracking progress and improvements over time
-
-This leads to wasted applications, missed opportunities, and frustration in the job search process.
+In today's competitive job market, job seekers struggle with optimizing resumes due to generic advice, ATS compatibility issues, unidentified skill gaps, and lack of progress tracking, leading to wasted applications and missed opportunities.
 
 ## 🗺️ Problem–Solution Mapping
 
-| Problem | Solution |
-|---------|----------|
-| Generic resume advice | AI-powered specific feedback on content, tone, and technical depth |
-| ATS compatibility issues | Automated ATS scoring and parsing analysis |
-| Unidentified skill gaps | Resume-job description matching with gap identification |
-| Lack of progress tracking | Analysis history with version comparison |
-| No personalized improvement plans | AI-generated learning roadmaps |
+The Resume Analyzer addresses these challenges by providing AI-powered specific feedback on content and tone, automated ATS scoring, resume-job description matching with gap identification, analysis history for progress tracking, and AI-generated learning roadmaps for personalized improvement plans.
 
-## 🔧 What is Implemented
+## 🏗️ System Architecture
 
-The Resume Analyzer implements a comprehensive analysis pipeline that combines multiple AI and algorithmic approaches:
-
-**Resume Processing**: Extracts text from PDF and DOCX files using specialized libraries (pdf-parse, mammoth) with robust error handling.
-
-**Multi-layered Analysis**:
-- **Keyword Matching**: TF-IDF based skill extraction and cosine similarity scoring
-- **ATS Compatibility**: Structural analysis for standard sections and contact information parsing
-- **Reality Check**: Detection of AI-generated content patterns vs. human writing styles
-- **Semantic Analysis**: AI-powered deep analysis using local Ollama models
-
-**Scoring System**: Combines multiple metrics into readiness, match, and authenticity scores with percentile ranking against anonymized user data.
-
-**Learning Integration**: Generates personalized 2-week improvement plans based on identified gaps.
-
-**Data Management**: Secure user authentication, resume storage, and analysis history with MongoDB.
-
-## 🏗️ Solution Overview
-
-The application follows a modern full-stack architecture:
-
-**Backend (Node.js/Express)**: Handles file uploads, text extraction, AI processing, and database operations. Uses async job queues for long-running AI tasks to prevent blocking.
-
-**Frontend (React)**: Provides an intuitive dashboard interface with drag-and-drop uploads, real-time analysis status, and interactive results visualization.
-
-**AI Integration (Ollama)**: Local language model processing ensures privacy and cost-effectiveness compared to cloud APIs.
-
-**Database (MongoDB)**: Stores user data, resumes, and analysis results with proper indexing and aggregation for percentile calculations.
-
-## ⭐ Project Highlights
-
-- **Dual AI Support**: Local Ollama + Cloud OpenAI with automatic fallback
-- **Privacy-First**: Local processing by default, cloud option for production
-- **Multi-Algorithm Scoring**: Combines traditional NLP with AI for comprehensive analysis
-- **Real-Time Processing**: Async job queues handle AI analysis without blocking UI
-- **Scalable Architecture**: Modular design allows easy addition of new analysis features
-- **Production-Ready**: Includes authentication, error handling, and logging
+- **Frontend**: React-based responsive interface for uploads and results visualization
+- **Backend**: Node.js/Express API handling file processing, AI analysis, and database operations
+- **Database**: MongoDB for storing user data, resumes, and analysis history
+- **Authentication**: JWT-based secure user management
+- **AI Integration**: Local Ollama models with cloud OpenAI fallback for privacy and scalability
 
 ## ✨ Features
 
-- 📄 **Resume Upload**: Support for PDF and DOCX formats with file validation
-- 🤖 **AI Analysis**: Local LLM-powered content and tone analysis
-- 🎯 **Skill Matching**: Automated comparison against job descriptions
-- 📊 **ATS Scoring**: Compatibility analysis for applicant tracking systems
-- 📈 **Progress Tracking**: Historical analysis with version comparison
-- 🎓 **Learning Roadmaps**: Personalized improvement plans
-- 🔒 **Secure Authentication**: JWT-based user management
-- 📱 **Responsive Design**: Mobile-friendly React interface
-
-## 📸 Screenshots
-
-![Home](outputs/home.webp)
-
-![Dashboard](outputs/dashboard.webp)
-
-![Analysis](outputs/result.webp)
+- Resume upload support for PDF and DOCX formats
+- AI-powered content and tone analysis
+- Skill matching against job descriptions
+- ATS compatibility scoring
+- Progress tracking with historical analysis
+- Personalized learning roadmaps
+- Secure user authentication
+- Responsive mobile-friendly design
 
 ## 🛠️ Tech Stack
 
-### Frontend
-- **React** - Component-based UI framework
-- **Tailwind CSS** - Utility-first CSS framework
-- **Vite** - Fast build tool and development server
-- **React Router** - Client-side routing
+- **Frontend**: React, Vite, Tailwind CSS
+- **Backend**: Node.js, Express.js
+- **Database**: MongoDB Atlas
+- **Authentication**: JWT, bcrypt
+- **AI**: AI Integration, pdf-parse, mammoth
 
-### Backend
-- **Node.js** - JavaScript runtime
-- **Express.js** - Web framework for APIs
-- **MongoDB** - NoSQL database
-- **Mongoose** - ODM for MongoDB
-
-### AI & Analysis
-- **Ollama** - Local language model integration (default)
-- **OpenAI** - Cloud AI processing (production option)
-- **pdf-parse** - PDF text extraction
-- **mammoth** - DOCX text extraction
-
-### Other Tools
-- **JWT** - Authentication tokens
-- **bcrypt** - Password hashing
-- **Multer** - File upload handling
-- **Winston** - Logging framework
-
-## 🚀 Installation / Setup Steps
+## 🚀 Installation / Setup
 
 ### Prerequisites
 - Node.js (v16 or higher)
@@ -173,26 +103,20 @@ OPENAI_API_KEY=your-openai-api-key-here
 OPENAI_MODEL=gpt-4o-mini
 ```
 
-## 📚 Key Learnings
+## 📸 Screenshots
 
-- **Multi-Provider AI Integration**: Implementing both local and cloud AI with fallback logic
-- **Algorithm Design**: Combining multiple scoring methods for comprehensive evaluation
-- **Async Processing**: Managing long-running tasks with job queues
-- **Full-Stack Development**: Coordinating frontend-backend-database interactions
-- **Data Privacy**: Handling sensitive resume data with security best practices
-- **User Experience**: Designing intuitive interfaces for complex analysis results
+![Home](outputs/home.webp)
 
-## 🔮 Future Improvements
+![Dashboard](outputs/dashboard.webp)
 
-- **Real-time Collaboration**: Multi-user resume review features
-- **Advanced Analytics**: Deeper insights with machine learning models
-- **Integration APIs**: LinkedIn and job board connections
-- **Mobile App**: Native mobile application
-- **Video Analysis**: Interview preparation with video feedback
-- **Team Features**: HR dashboard for bulk resume processing
+![Analysis](outputs/result.webp)
 
-## 📬 Contact
+## 📄 License
 
-**Samiksha Balaji Lone**  
-📧 samikshalone2@gmail.com  
-🔗 [LinkedIn](https://linkedin.com/in/samiksha-lone) | [Portfolio](https://samiksha-lone.vercel.app/)
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Credit
+
+If you use or build upon this project, please provide attribution:  
+Samiksha Lone  
+https://github.com/Samiksha-Lone
