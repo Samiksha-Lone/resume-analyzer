@@ -16,6 +16,7 @@ import Button from '../components/ui/Button';
 import Card, { CardContent } from '../components/ui/Card';
 import { useNavigate } from 'react-router-dom';
 import { useResumes } from '../context/ResumeContext';
+import Logo from '../components/ui/Logo';
 
 const AnalyzeResume = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -311,10 +312,15 @@ const AnalyzeResume = () => {
             className="fixed inset-0 z-[200] flex items-center justify-center bg-white/90 dark:bg-[#1C1C1C]/95 backdrop-blur-sm"
           >
             <div className="max-w-sm px-6 space-y-6 text-center">
-               <BrainCircuit className="mx-auto w-12 h-12 text-[#00BFFF] animate-pulse" />
+               <div className="flex justify-center">
+                 <Logo className="w-16 h-16 animate-pulse" />
+               </div>
                <div className="space-y-2">
-                  <h3 className="text-2xl font-bold text-stone-900 dark:text-white">Analyzing</h3>
-                  <p className="text-sm font-medium text-stone-500 dark:text-stone-400">{analysisStatus}</p>
+                  <h3 className="text-2xl font-bold text-stone-900 dark:text-white uppercase tracking-tight">Analyzing</h3>
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-stone-500 dark:text-stone-400">{analysisStatus}</p>
+                    <p className="text-[10px] text-stone-400 dark:text-stone-500 italic">Our AI is performing a deep-level scan of your skills and job alignment. This usually takes 10-15 seconds.</p>
+                  </div>
                </div>
             </div>
           </motion.div>

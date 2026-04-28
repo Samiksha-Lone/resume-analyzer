@@ -75,7 +75,7 @@ const ResumeEditor = () => {
           </div>
         </div>
 
-        <Button onClick={handleDownload} variant="primary" className="rounded-full gap-2 shadow-lg shadow-accent/20">
+        <Button onClick={handleDownload} variant="primary" className="rounded-full gap-2">
           <Download className="w-4 h-4" /> Download Optimized Resume
         </Button>
       </header>
@@ -102,7 +102,7 @@ const ResumeEditor = () => {
           <div className="p-6 border-b border-stone-200 dark:border-white/5 flex items-center justify-between bg-stone-50/50 dark:bg-white/5">
              <div className="flex items-center gap-2">
                <Sparkles className="w-4 h-4 text-accent" />
-               <h3 className="font-bold tracking-tighter dark:text-white">Precision Rewrites</h3>
+               <h3 className="font-bold tracking-tighter dark:text-white">Suggested Rewrites</h3>
              </div>
              <div className="px-3 py-1 bg-stone-200 dark:bg-white/10 rounded-full text-[10px] font-black dark:text-white">
                {suggestions.length} FOUND
@@ -139,7 +139,7 @@ const ResumeEditor = () => {
                     <div className="flex items-start gap-3">
                       <CheckCircle2 className={`w-4 h-4 mt-1 flex-shrink-0 ${isApplied ? 'text-emerald-500' : 'text-stone-900 dark:text-white'}`} />
                       <div>
-                         <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${isApplied ? 'text-emerald-600 dark:text-emerald-500' : 'text-accent'}`}>Optimized Rewrite</p>
+                         <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${isApplied ? 'text-emerald-600 dark:text-emerald-500' : 'text-accent'}`}>Suggested Change</p>
                          <p className={`text-sm font-bold leading-relaxed ${isApplied ? 'text-emerald-900 dark:text-emerald-100' : 'text-stone-900 dark:text-white'}`}>
                            {item.rewrite}
                          </p>

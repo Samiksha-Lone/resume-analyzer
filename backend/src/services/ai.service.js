@@ -323,8 +323,11 @@ async function analyzeMatchWithOllama({ resumeText, jobDescription, jobTitle, ta
   const resumePreview = resumeText.length > 2500 ? `${resumeText.slice(0, 2500)}\n...[truncated]` : resumeText;
   const jdPreview = jobDescription.length > 2500 ? `${jobDescription.slice(0, 2500)}\n...[truncated]` : jobDescription;
 
-  const prompt = `You are an expert ATS (Applicant Tracking System) analyst and high-level technical recruiter. 
+  const prompt = `You are an expert ATS (Applicant Tracking System) analyst and recruiter. 
 Compare the resume text and the job description and return ONLY valid JSON.
+
+CRITICAL: Extract skills ONLY from the provided job description. Do NOT add skills from general knowledge.
+If a skill is not explicitly mentioned in the job description, do NOT include it.
 
 Resume Text:
 ${resumePreview}
@@ -334,19 +337,21 @@ ${jdPreview}
 
 ${jobTitle ? `Target Job Title: ${jobTitle}\n` : ''}${targetSkills && targetSkills.length ? `Priority Skills: ${targetSkills.join(', ')}\n` : ''}
 
-CRITICAL EXTRACTION RULES for "matchedSkills" and "skillGaps":
-1. ONLY include professional skills, technical tools, frameworks, and specific certifications.
-2. EXCLUDE all generic verbs, pronouns, and noise words (e.g., "we", "seeking", "build", "maintain", "creating", "strong", "involves", "developing", "role", "using", "applications").
-3. DO NOT include common English stop words or phrases that do not represent a specific skill or keyword a recruiter would search for.
-4. Focus on high-impact keywords like "React", "Node.js", "AWS", "Agile", "PostgreSQL".
+SKILL EXTRACTION RULES:
+1. ONLY extract skills that are explicitly mentioned in the job description above.
+2. Do NOT add skills from external knowledge or common role requirements.
+3. Only include professional skills, technical tools, frameworks, and specific certifications.
+4. EXCLUDE generic verbs, adjectives, and noise words (e.g., "we", "seeking", "build", "maintain", "creating", "strong", "involves", "developing", "role", "using", "applications").
+5. EXCLUDE common English stop words that do not represent a specific skill.
+6. Focus on high-impact keywords like "React", "Node.js", "AWS", etc. that are mentioned in the JD.
 
 Output JSON with keys:
 {
-  "aiMatchScore": number, // 0-100 score
+  "aiMatchScore": number, // 0-100 score based on resume vs JD skills match
   "summary": string, // Professional summary of the match
-  "matchedSkills": string[], // Significant technical/professional skills found in both
-  "skillGaps": string[], // Significant technical/professional skills in JD but missing in resume
-  "recommendations": string[], // Actionable steps to improve the resume
+  "matchedSkills": string[], // Skills found in BOTH resume AND job description (from JD only)
+  "skillGaps": string[], // Skills mentioned in JD but missing in resume (from JD only, NOT from external database)
+  "recommendations": string[], // Actionable steps to improve the resume for this specific role
   "rewriteSuggestions": [
     {
       "original": string,
@@ -380,6 +385,8 @@ Output JSON with keys:
   "humanizationSuggestions": string[]
 }
 
+IMPORTANT: skillGaps MUST ONLY contain skills from the job description provided above.
+Do NOT include skills from general role requirements or external knowledge bases.
 Focus on depth and clarity. Only return JSON. No additional text.`;
 
   const raw = await generateText(prompt);

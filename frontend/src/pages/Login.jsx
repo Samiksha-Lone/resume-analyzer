@@ -76,14 +76,14 @@ const Login = () => {
           className="flex flex-col items-center text-center mb-6"
         >
           <Link to="/" className="flex items-center gap-3 mb-4 group">
-             <div className="w-10 h-10 rounded-2xl bg-accent flex items-center justify-center shadow-lg shadow-accent/20 group-hover:scale-110 transition-transform">
+             <div className="w-10 h-10 rounded-2xl bg-accent flex items-center justify-center group-hover:scale-110 transition-transform">
                 <BrainCircuit className="w-6 h-6 text-white" />
              </div>
              <span className="text-xl font-black tracking-tighter dark:text-white">HIRE<span className="text-accent">METRIC</span></span>
           </Link>
           
           <h1 className="text-4xl font-black tracking-tighter dark:text-white leading-none">
-            Member <span className="text-accent underline decoration-stone-800/30">Login.</span>
+            Welcome <span className="text-accent underline decoration-stone-800/30">Back.</span>
           </h1>
         </motion.div>
 
@@ -103,7 +103,7 @@ const Login = () => {
 
               <div className="space-y-3">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-4">Credential Identity</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-4">Email</label>
                   <div className="relative group">
                     <Mail className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 group-focus-within:text-accent transition-colors" />
                     <input 
@@ -118,7 +118,7 @@ const Login = () => {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-4">Access Secret</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-4">Password</label>
                   <div className="relative group">
                     <Lock className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 group-focus-within:text-accent transition-colors" />
                     <input 
@@ -150,11 +150,11 @@ const Login = () => {
                   {isSubmitting ? (
                     <span className="flex items-center gap-3">
                        <Activity className="pulse-slow w-4 h-4" /> 
-                       Authenticating...
+                       Signing in...
                     </span>
                   ) : (
                     <span className="flex items-center gap-2">
-                       Secure Login <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                       Sign In <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </span>
                   )}
                 </Button>

@@ -5,12 +5,12 @@ import {
   FileSearch, 
   History, 
   Settings,
-  BrainCircuit,
   LogOut
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import Logo from '../ui/Logo';
 
 function cn(...inputs) {
   return twMerge(clsx(inputs));
@@ -34,10 +34,10 @@ const Sidebar = ({ className }) => {
       <div className="p-8 pb-10">
         <NavLink to="/" className="flex items-center gap-3 group">
           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#00BFFF]">
-            <BrainCircuit className="w-5 h-5 text-white" />
+            <Logo className="w-5 h-5 text-white" />
           </div>
           <span className="text-xl font-bold tracking-tight text-stone-900 dark:text-white">
-            Hire<span className="text-[#00BFFF]">Metric</span>
+            Score<span className="text-[#00BFFF]">Sync</span>
           </span>
         </NavLink>
       </div>
@@ -75,7 +75,7 @@ const Sidebar = ({ className }) => {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold tracking-tight truncate text-stone-900 dark:text-white">{user?.name || 'User'}</p>
-            <p className="text-xs text-stone-500 dark:text-stone-400 truncate">{user?.email || 'user@hiremetric'}</p>
+            <p className="text-xs text-stone-500 dark:text-stone-400 truncate">{user?.email || 'user@scoresync'}</p>
           </div>
           <button 
             onClick={logout}

@@ -25,7 +25,7 @@ async function saveSnapshot({ userId, resumeId, resumeName, jobTitle, analysis }
 async function getUserHistory(userId) {
   return AnalysisHistory.find({ userId })
     .sort({ createdAt: -1 })
-    .select('resumeId resumeName jobTitle scores createdAt')
+    .select('resumeId resumeName jobTitle scores createdAt snapshot')
     .lean();
 }
 
@@ -66,4 +66,18 @@ async function cleanupOldHistory(userId, keepCount = 20) {
   }
 }
 
-module.exports = { saveSnapshot, getUserHistory, compareSnapshots, cleanupOldHistory };
+/**
+ * Get a specific history entry by ID.
+ */
+async function getHistoryById(id, userId) {
+  return AnalysisHistory.findOne({ _id: id, userId }).lean();
+}
+
+/**
+ * Delete a specific history entry.
+ */
+async function deleteHistoryById(id, userId) {
+  return AnalysisHistory.findOneAndDelete({ _id: id, userId });
+}
+
+module.exports = { saveSnapshot, getUserHistory, compareSnapshots, getHistoryById, deleteHistoryById, cleanupOldHistory };

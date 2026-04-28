@@ -25,13 +25,103 @@ const { pushAndRank } = require('./percentile.service');
 
 /**
  * Stopwords to filter out during tokenization
- * Common English words that don't provide meaningful skill information
+ * Common English words, prepositions, conjunctions, and generic descriptors
  * @type {Set<string>}
  */
 const stopwords = new Set([
-  'and', 'or', 'the', 'a', 'an', 'to', 'for', 'of', 'in', 'on', 'with', 'by', 'from',
-  'that', 'this', 'is', 'are', 'as', 'at', 'be', 'have', 'has', 'had', 'will', 'would',
-  'should', 'can', 'may', 'must', 'if', 'else', 'about', 'it', 'its', 'which', 'their'
+  // Articles, prepositions, conjunctions
+  'and','or','the','a','an','to','for','of','in','on','with','by','from','that','this',
+  'is','are','as','at','be','have','has','had','will','would','should','can','may','must',
+  'if','else','about','it','its','which','their','both','such','also','other','various',
+  'multiple','well','more','most','some','any','all','each','every','few','many','not',
+  'no','yes','very','too','so','just','only','but','however','across','within','between',
+  'through','during','before','after','while','although','because','since','until',
+  'same','different','next','first','last','plus','including',
+  // Pronouns
+  'we','you','our','your','us','who','what','when','where','how','why',
+  'they','them','he','she','his','her','him','i','me','my',
+  // Common verbs (not skills)
+  'ensure','maintain','develop','build','create','manage','provide','work','support',
+  'seek','collaborate','deliver','help','design','implement','integrate','understand',
+  'apply','use','write','code','test','debug','deploy','monitor','review','analyze',
+  'plan','coordinate','communicate','present','report','participate','contribute',
+  'assist','mentor','train','grow','scale','improve','enhance','update','upgrade',
+  'migrate','fix','resolve','identify','investigate','troubleshoot','learn','adapt',
+  'innovate','research','explore','evaluate','make','take','give','get','go','come',
+  'see','know','think','look','want','need','feel','try','call','keep','let','put',
+  'run','set','do','does','did','done','been','being','was','were','am',
+  // Gerunds / present participles of the above
+  'building','developing','maintaining','creating','managing','working','seeking',
+  'collaborating','delivering','optimizing','ensuring','supporting','implementing',
+  'integrating','improving','handling','writing','solving','testing','debugging',
+  'deploying','monitoring','designing','applying','providing','contributing',
+  'leading','defining','owning','driving','serving','performing','following',
+  'using','used','worked',
+  // Adjectives / adverbs (not skills)
+  'strong','excellent','good','great','high','low','fast','slow','new','old','large',
+  'small','best','better','modern','current','existing','latest','highly','deeply',
+  'quickly','efficiently','effectively','successfully','responsible','preferred',
+  'required','proficient','motivated','passionate','cross','functional','quality',
+  'driven','oriented','focused','based','related','equivalent','similar','proven',
+  'solid','demonstrated','innovative','strategic','dynamic','collaborative','diverse',
+  // Job-posting nouns (not skills)
+  'role','position','job','opportunity','company','organization','business','team',
+  'teams','member','members','candidate','candidates','applicant','system','systems',
+  'application','applications','platform','platforms','solution','solutions','product',
+  'products','service','services','project','projects','responsibilities',
+  'qualifications','requirements','experience','knowledge','ability','skill','skills',
+  'background','environment','startup','enterprise','industry','market','field',
+  'client','clients','customer','customers','user','users','stakeholder','partner',
+  'partners','vendor','vendors','employer','employee','staff','people','person',
+  'individual','individuals','information','content','process','processes','procedure',
+  'standard','standards','practice','documentation','deadline','timeline','ownership',
+  'mindset','culture','degree','bachelor','master','year','years','month','months',
+  'day','days','week','weeks','time','full','part','contract','remote','onsite','hybrid',
+  'senior','junior','mid','level','entry','lead','principal',
+  // Generic quality / noise words from JDs
+  'responsiveness','reliability','scalability','maintainability','readability',
+  'performance','efficiency','accuracy','consistency','flexibility','availability',
+  'hire','hiring','join','joining','apply','applying','responsible','responsible',
+  'high-quality','cross-functional','self-motivated','detail-oriented','results-driven',
+  'professional','summary','education','certifications','achievements',
+]);
+
+/**
+ * Comprehensive whitelist of real technical skills / tools / frameworks.
+ * Used to extract meaningful skills from job descriptions when AI is unavailable.
+ * @type {Set<string>}
+ */
+const TECH_SKILLS_WHITELIST = new Set([
+  // Languages
+  'javascript','typescript','python','java','c++','c#','rust','go','golang','php','ruby',
+  'scala','kotlin','swift','r','matlab','perl','shell','bash','powershell','lua','dart',
+  // Frontend
+  'react','react.js','reactjs','angular','vue','vue.js','vuejs','svelte','nextjs','next.js',
+  'nuxt','gatsby','html','css','sass','less','tailwind','bootstrap','webpack','vite',
+  'redux','zustand','mobx','graphql','apollo','jest','cypress','playwright','storybook',
+  // Backend
+  'node','node.js','nodejs','express','express.js','fastify','nestjs','django','flask',
+  'fastapi','spring','spring boot','laravel','rails','asp.net','dotnet','grpc','rest',
+  'restful','rest api','graphql','websockets','oauth','jwt','oauth2','openid',
+  // Databases
+  'sql','mysql','postgresql','postgres','mongodb','redis','elasticsearch','cassandra',
+  'dynamodb','firestore','sqlite','mariadb','oracle','mssql','supabase','prisma',
+  'sequelize','mongoose','typeorm','drizzle',
+  // Cloud / DevOps
+  'aws','azure','gcp','google cloud','heroku','vercel','netlify','docker','kubernetes',
+  'k8s','terraform','ansible','helm','jenkins','github actions','gitlab ci','circleci',
+  'travis ci','ci/cd','nginx','apache','linux','ubuntu','centos','debian',
+  // Data / AI / ML
+  'tensorflow','pytorch','keras','scikit-learn','pandas','numpy','spark','hadoop',
+  'kafka','airflow','mlflow','langchain','openai','hugging face','llm','rag',
+  // Tools / Practices
+  'git','github','gitlab','bitbucket','jira','confluence','figma','postman','swagger',
+  'agile','scrum','kanban','tdd','bdd','microservices','monorepo','serverless',
+  'websocket','oauth','rest','soap','json','xml','yaml','markdown','linux',
+  // Mobile
+  'react native','flutter','android','ios','xcode','expo','firebase',
+  // Testing
+  'jest','mocha','chai','pytest','junit','selenium','cypress','playwright',
 ]);
 
 /**
@@ -137,19 +227,29 @@ function computeAiToneAnalysis(text) {
   const aiToneCount = countMatches(normalized, aiToneIndicators);
   const genericPhraseCount = countMatches(normalized, genericBuzzwords.concat(genericCrudPhrases));
 
-  const confidence = Math.min(100, Math.max(0,
-    20 + aiToneCount * 12 + genericPhraseCount * 8 + longSentenceCount * 7
-  ));
+  const totalSentences = Math.max(1, sentenceList.length);
+  const longSentenceRatio = longSentenceCount / totalSentences;
 
-  const label = confidence >= 55
-    ? `Resume sounds AI-generated (${confidence}% confidence)`
-    : `Resume sounds human-like (${confidence}% confidence)`;
+  // More conservative confidence scoring
+  let confidence = 0;
+  confidence += Math.min(30, aiToneCount * 8);
+  confidence += Math.min(25, genericPhraseCount * 5);
+  confidence += Math.min(20, longSentenceCount * 4);
+  if (longSentenceRatio > 0.4) confidence += 10;
+  if (aiToneCount > 5) confidence += 15;
+  confidence = Math.max(0, Math.min(85, confidence));
+
+  const label = confidence >= 60
+    ? 'Resume sounds AI-generated (' + confidence + '% confidence)'
+    : confidence >= 35
+    ? 'Resume shows mixed characteristics (' + confidence + '% AI-like)'
+    : 'Resume sounds human-like (' + confidence + '% confidence)';
 
   const suggestions = [];
-  if (aiToneCount > 0) suggestions.push('Reduce AI-style buzzwords and template phrases.');
-  if (genericPhraseCount > 0) suggestions.push('Replace generic descriptions with concrete results.');
-  if (longSentenceCount > 0) suggestions.push('Shorten overly polished sentences.');
-  if (suggestions.length === 0) suggestions.push('Add more personalized details.');
+  if (aiToneCount > 3) suggestions.push('Reduce AI-style buzzwords; use specific examples instead.');
+  if (genericPhraseCount > 5) suggestions.push('Replace generic descriptions with measurable achievements.');
+  if (longSentenceCount > totalSentences * 0.3) suggestions.push('Break long sentences into shorter, punchier statements.');
+  if (aiToneCount < 1 && genericPhraseCount < 2) suggestions.push('Good authentic tone detected!');
 
   return { confidence, label, suggestions };
 }
@@ -164,13 +264,49 @@ function unique(array) {
   return Array.from(new Set(array));
 }
 
-function extractCandidateSkills(text, limit = 40) {
+/**
+ * Extract skills from text using TECH_SKILLS_WHITELIST first,
+ * then fall back to filtered frequency tokens.
+ * This prevents generic words like 'responsible' being listed as skills.
+ * 
+ * IMPORTANT: When extracting from JD, use strict mode to ONLY extract skills
+ * explicitly mentioned in the text, not from external knowledge.
+ */
+function extractCandidateSkills(text, limit = 30, strictMode = false) {
+  const lower = text.toLowerCase();
+  
+  if (strictMode) {
+    // Strict mode: Only match skills that are explicitly in the whitelist
+    // This prevents hallucinating skills not in the document
+    const whitelistMatches = [];
+    for (const skill of TECH_SKILLS_WHITELIST) {
+      // Match both single and multi-word skills
+      const skillRegex = new RegExp(`\\b${skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+      if (skillRegex.test(lower)) {
+        whitelistMatches.push(skill);
+      }
+    }
+    // Return all whitelist matches found (no limit in strict mode for completeness)
+    return unique(whitelistMatches);
+  }
+  
+  // Standard mode: Multi-word skills first
+  const whitelistMatches = [];
+  for (const skill of TECH_SKILLS_WHITELIST) {
+    if (lower.includes(skill)) {
+      whitelistMatches.push(skill);
+    }
+  }
+  if (whitelistMatches.length >= 5) {
+    return unique(whitelistMatches).slice(0, limit);
+  }
+  
+  // Fallback — frequency tokens filtered through stopwords
   const tokens = tokenize(normalize(text));
   const frequency = tokens.reduce((acc, token) => {
     acc[token] = (acc[token] || 0) + 1;
     return acc;
   }, {});
-
   return Object.entries(frequency)
     .sort((a, b) => b[1] - a[1])
     .slice(0, limit)
@@ -214,27 +350,45 @@ function computeRealityCheck(text) {
   const sections = findSections(normalized);
   const keywordCount = unique(tokenize(normalized)).length;
 
-  // Scoring Logic
-  const impactScore = Math.min(30, impactCount * 8);
-  const numberScore = Math.min(20, numberCount * 6);
-  const depthScore = Math.min(25, depthCount * 8 + advancedCount * 4);
-  const atsScore = Math.min(25, (contact.contactFound ? 10 : 0) + (sections.length * 3));
+  // Improved Scoring Logic (more conservative and realistic for students)
+  const textLength = text.trim().length;
+  const hasDateReferences = text.includes('year') || text.includes('month');
   
-  const penalties = Math.min(30, buzzwordCount * 5 + genericPhraseCount * 5);
+  // Conservative point allocation
+  const impactScore = Math.min(20, impactCount * 5);  // Reduced from 30 to 20
+  const numberScore = Math.min(15, numberCount * 4);  // Reduced from 20 to 15
+  const depthScore = Math.min(20, depthCount * 6 + advancedCount * 3);  // Reduced from 25 to 20
+  const atsScore = Math.min(20, (contact.email ? 8 : 0) + (contact.phone ? 5 : 0) + (sections.length * 2));  // Reduced from 25
+  const contentQualityScore = Math.min(15, (textLength > 500 ? 8 : 0) + (hasDateReferences ? 7 : 0));
   
-  let rawScore = impactScore + numberScore + depthScore + atsScore - penalties;
-  rawScore = Math.max(0, Math.min(100, rawScore));
+  // Stronger penalties for red flags
+  const buzzwordPenalty = Math.min(25, buzzwordCount * 6);  // Increased penalty
+  const genericPhrasePenalty = Math.min(20, genericPhraseCount * 7);  // Increased penalty
+  
+  let rawScore = impactScore + numberScore + depthScore + atsScore + contentQualityScore - buzzwordPenalty - genericPhrasePenalty;
+  rawScore = Math.max(0, Math.min(90, rawScore));  // Max 90% (more realistic)
 
-  const label = rawScore >= 65 ? '✅ Strong hiring potential' : rawScore >= 40 ? '⚠️ Moderate screening risk' : '❌ High rejection probability';
+  const label = rawScore >= 75 
+    ? '✅ Strong hiring potential' 
+    : rawScore >= 55 
+    ? '⚠️ Moderate hiring potential' 
+    : rawScore >= 35
+    ? '⚠️ Needs improvement'
+    : '❌ High rejection risk';
 
   const reasons = [];
-  if (impactCount > 2) reasons.push('Strong use of action-oriented impact language.');
-  if (numberCount > 1) reasons.push('Quantifiable metrics found (shows results-driven mindset).');
-  if (depthCount > 2) reasons.push('Project descriptions show good technical ownership.');
-  if (advancedCount > 1) reasons.push('Advanced technologies (Auth/Scaling/APIs) detected.');
-  if (!contact.contactFound) reasons.push('Contact information (email/phone) is missing or unparseable.');
-  if (sections.length < 4) reasons.push('Resume structure is missing standard professional sections.');
-  if (buzzwordCount > 3) reasons.push('Overuse of generic buzzwords detected.');
+  if (impactCount >= 3) reasons.push('Strong use of action-oriented language (shows impact).');
+  if (numberCount >= 2) reasons.push('Good use of quantifiable metrics (results-oriented).');
+  if (depthCount >= 2) reasons.push('Project descriptions show technical ownership.');
+  if (advancedCount >= 1) reasons.push('Advanced technologies detected in experience.');
+  if (!contact.email) reasons.push('Missing email address (critical for ATS parsing).');
+  if (!contact.phone) reasons.push('Missing phone number (recommended).');
+  if (sections.length < 4) reasons.push('Add standard sections: Education, Experience, Skills, Projects.');
+  if (buzzwordCount > 5) reasons.push('Reduce generic buzzwords; use specific achievements instead.');
+  if (genericPhraseCount > 4) reasons.push('Replace vague phrases with concrete accomplishments.');
+  if (impactCount < 1) reasons.push('Add action verbs and impact-focused statements.');
+  if (numberCount < 1) reasons.push('Include metrics and numbers to quantify achievements.');
+  if (textLength < 300) reasons.push('Resume is too brief; add more relevant experience and details.');
 
   return {
     score: rawScore,
@@ -244,8 +398,11 @@ function computeRealityCheck(text) {
       impactCount,
       numberCount,
       depthCount,
-      atsCompatible: sections.length >= 5 && contact.contactFound,
-      scanTime: 6.0 + (sections.length * 0.2)
+      advancedCount,
+      atsCompatible: sections.length >= 4 && contact.contactFound,
+      scanTime: 5.5 + (sections.length * 0.18),
+      contentLength: textLength,
+      keywordCount
     }
   };
 }
@@ -306,9 +463,10 @@ async function analyzeResumeMatch({ resumeText, jobDescription, jobTitle, target
   const normalizedResume = normalize(resumeText);
   const normalizedJD = normalize(jobDescription);
 
+  // Use strict mode when extracting skills from JD to prevent hallucination
   const jdSkills = targetSkills.length
     ? unique(targetSkills.map((skill) => normalize(skill)))
-    : extractCandidateSkills(normalizedJD, 30);
+    : extractCandidateSkills(normalizedJD, 50, true); // Strict mode: only extract skills explicitly in JD
 
   const resumeTokens = unique(tokenize(normalizedResume));
   const matchedSkills = intersection(jdSkills, resumeTokens);
@@ -318,12 +476,13 @@ async function analyzeResumeMatch({ resumeText, jobDescription, jobTitle, target
   const keywordOverlap = unique(tokenize(normalizedJD)).filter((token) => resumeTokens.includes(token)).length;
   const keywordCoverage = normalizedJD ? keywordOverlap / unique(tokenize(normalizedJD)).length : 0;
 
-  const matchScore = Math.round(((skillCoverage * 0.7) + (keywordCoverage * 0.3)) * 100);
+  // Improved Job Match Scoring with weightage
+  const baseMatchScore = Math.round(((skillCoverage * 0.7) + (keywordCoverage * 0.3)) * 100);
   const realityCheck = computeRealityCheck(resumeText);
   const aiToneAnalysis = computeAiToneAnalysis(resumeText);
 
   let aiResult = {
-    aiMatchScore: matchScore,
+    aiMatchScore: baseMatchScore,
     summary: 'AI analysis result',
     recommendations: [],
     rewriteSuggestions: [],
@@ -344,8 +503,40 @@ async function analyzeResumeMatch({ resumeText, jobDescription, jobTitle, target
     // Fallback to heuristics
   }
 
-  const finalJobMatchScore = aiResult.aiMatchScore || matchScore;
-  const finalReadinessScore = Math.round((finalJobMatchScore + realityCheck.score) / 2);
+  // SAFEGUARD: Filter AI results to ONLY include skills from the JD
+  // This prevents the AI from adding skills not in the job description
+  if (aiResult.matchedSkills && aiResult.matchedSkills.length > 0) {
+    aiResult.matchedSkills = aiResult.matchedSkills.filter(skill => {
+      const skillLower = String(skill).toLowerCase();
+      return jdSkills.some(jdSkill => jdSkill.toLowerCase() === skillLower);
+    });
+  }
+  
+  if (aiResult.skillGaps && aiResult.skillGaps.length > 0) {
+    aiResult.skillGaps = aiResult.skillGaps.filter(skill => {
+      const skillLower = String(skill).toLowerCase();
+      return jdSkills.some(jdSkill => jdSkill.toLowerCase() === skillLower);
+    });
+  }
+
+  // Improved Scoring Algorithm for Accuracy
+  const finalJobMatchScore = aiResult.aiMatchScore || baseMatchScore;
+  
+  // Weighted readiness score formula for better accuracy:
+  // - Job Match Quality: 35% (how well resume matches job)
+  // - Reality/Authenticity: 25% (hiring signals and impact)
+  // - ATS Compatibility: 25% (can ATS parse it properly)
+  // - Formatting/Professionalism: 15% (visual presentation)
+  const atsCompatScore = Math.min(85, Math.max(20, realityCheck.details?.scanTime ? 60 : 40));
+  const formattingScore = Math.min(85, Math.max(30, (realityCheck.details?.keywordCount || 0) > 15 ? 70 : 50));
+  
+  const finalReadinessScore = Math.round(
+    (finalJobMatchScore * 0.35) +
+    (realityCheck.score * 0.25) +
+    (atsCompatScore * 0.25) +
+    (formattingScore * 0.15)
+  );
+  
   const finalAuthScore = 100 - (aiResult.aiToneScore || aiToneAnalysis.confidence);
 
   // --- ML Feature 1: Industry Benchmark (TF-IDF + Cosine Similarity) ---
@@ -371,10 +562,12 @@ async function analyzeResumeMatch({ resumeText, jobDescription, jobTitle, target
   }
 
   return {
+    resumeText,
     jobMatchScore: finalJobMatchScore,
     readinessScore: finalReadinessScore,
-    matchedSkills: aiResult.matchedSkills || matchedSkills,
-    skillGaps: aiResult.skillGaps || skillGaps,
+    // Use AI skills if they are non-empty arrays; otherwise use whitelist-based heuristic
+    matchedSkills: (aiResult.matchedSkills && aiResult.matchedSkills.length > 0) ? aiResult.matchedSkills : matchedSkills,
+    skillGaps: (aiResult.skillGaps && aiResult.skillGaps.length > 0) ? aiResult.skillGaps : skillGaps,
     summary: aiResult.summary,
     recommendations: aiResult.recommendations,
     rewriteSuggestions: aiResult.rewriteSuggestions,

@@ -1,16 +1,32 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Target, BarChart, FileText, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
+import { 
+  ArrowLeft, 
+  Target, 
+  BarChart, 
+  FileText, 
+  CheckCircle2, 
+  AlertCircle, 
+  Sparkles,
+  Download
+} from 'lucide-react';
 import Button from '../components/ui/Button';
 import Card, { CardContent } from '../components/ui/Card';
 import LearningRoadmap from '../components/dashboard/LearningRoadmap';
 import { useNavigate } from 'react-router-dom';
 import { useResumes } from '../context/ResumeContext';
+import { generateAtsResume } from '../utils/pdfGenerator';
 
 const ResultsDashboard = () => {
   const navigate = useNavigate();
   const { analysisResults } = useResumes();
   const [hoveredQuestion, setHoveredQuestion] = useState(null);
   const [expandedQuestion, setExpandedQuestion] = useState(null);
+
+  const handleDownload = () => {
+    if (analysisResults) {
+      generateAtsResume(analysisResults.resumeText || analysisResults.extractedText, analysisResults.rewriteSuggestions);
+    }
+  };
 
   const prettyBenchmarkKey = (key) => {
     const labels = {
@@ -31,7 +47,7 @@ const ResultsDashboard = () => {
           {value.map((item, idx) => (
             <div key={idx} className="rounded-2xl bg-stone-100 dark:bg-[#111111] p-4 border border-stone-200 dark:border-white/10">
               <p className="text-sm text-stone-700 dark:text-stone-300"><span className="font-semibold text-stone-900 dark:text-white">Role -</span> {item.role}</p>
-              <p className="mt-2 text-sm text-stone-700 dark:text-stone-300"><span className="font-semibold text-stone-900 dark:text-white">Similarity -</span> {typeof item.similarity === 'number' ? item.similarity.toFixed(2) : String(item.similarity)}</p>
+              <p className="mt-2 text-sm text-stone-700 dark:text-stone-300"><span className="font-semibold text-stone-900 dark:text-white">Similarity -</span> {typeof item.similarity === 'number' ? `${Math.round(item.similarity)}%` : String(item.similarity)}</p>
             </div>
           ))}
         </div>
@@ -74,18 +90,27 @@ const ResultsDashboard = () => {
   const jobMatchScore = analysisResults.jobMatchScore || 0;
 
   return (
-    <div className="pb-20 space-y-10 duration-500 animate-in fade-in slide-in-from-bottom-4">
-      <div className="flex items-center gap-4 pb-6 border-b border-stone-200 dark:border-white/5">
-        <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')} className="p-2 border rounded-lg border-stone-200 dark:border-white/10">
-          <ArrowLeft className="w-5 h-5 text-stone-900 dark:text-white" />
+    <div className="pb-10 space-y-6 duration-500 animate-in fade-in slide-in-from-bottom-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-stone-200 dark:border-white/5">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')} className="p-2 border rounded-lg border-stone-200 dark:border-white/10">
+            <ArrowLeft className="w-5 h-5 text-stone-900 dark:text-white" />
+          </Button>
+          <h1 className="text-3xl font-bold tracking-tight text-stone-900 dark:text-white">Your Resume Analysis</h1>
+        </div>
+        <Button 
+          onClick={handleDownload}
+          className="bg-[#00BFFF] hover:bg-[#009acd] text-white border-none rounded-xl px-6 py-2.5 flex items-center gap-2 font-bold shadow-sm"
+        >
+          <Download className="w-4 h-4" />
+          Download Optimized Resume
         </Button>
-        <h1 className="text-3xl font-bold tracking-tight text-stone-900 dark:text-white">Your Resume Analysis</h1>
       </div>
 
       {analysisResults.summary && (
         <Card className="bg-white dark:bg-[#1C1C1C] rounded-2xl border border-stone-200 dark:border-white/5 shadow-sm">
           <CardContent className="p-6">
-            <h2 className="mb-3 text-xl font-bold text-stone-900 dark:text-white">AI Summary</h2>
+            <h2 className="mb-3 text-xl font-bold text-stone-900 dark:text-white">Summary</h2>
             <p className="leading-relaxed text-stone-600 dark:text-stone-300">{analysisResults.summary}</p>
           </CardContent>
         </Card>
@@ -113,8 +138,8 @@ const ResultsDashboard = () => {
       </div>
 
       {/* 1. Key Feedback */}
-      <div className="bg-white dark:bg-[#1C1C1C] rounded-2xl border border-stone-200 dark:border-white/5 p-8 shadow-sm">
-        <h3 className="mb-6 text-xl font-bold text-stone-900 dark:text-white">Key Feedback</h3>
+      <div className="bg-white dark:bg-[#1C1C1C] rounded-2xl border border-stone-200 dark:border-white/5 p-6 shadow-sm">
+        <h3 className="mb-6 text-xl font-bold text-stone-900 dark:text-white">What We Found</h3>
         <ul className="space-y-4">
           {(analysisResults.realityCheck?.reasons || []).map((reason, i) => (
             <li key={i} className="flex items-start gap-4">
@@ -135,8 +160,8 @@ const ResultsDashboard = () => {
       </div>
 
       {/* 2. Skill Gap */}
-      <div className="bg-white dark:bg-[#1C1C1C] rounded-2xl border border-stone-200 dark:border-white/5 p-8 shadow-sm">
-        <h3 className="mb-6 text-xl font-bold text-stone-900 dark:text-white">Skill Gap Analysis</h3>
+      <div className="bg-white dark:bg-[#1C1C1C] rounded-2xl border border-stone-200 dark:border-white/5 p-6 shadow-sm">
+        <h3 className="mb-6 text-xl font-bold text-stone-900 dark:text-white">Skills Breakdown</h3>
         <div className="grid gap-8 md:grid-cols-2">
           <div className="space-y-4">
             <h4 className="flex items-center gap-2 font-semibold text-emerald-600 dark:text-emerald-400">
@@ -168,7 +193,7 @@ const ResultsDashboard = () => {
       </div>
 
       {/* 3. Suggestions */}
-      <div className="bg-white dark:bg-[#1C1C1C] rounded-2xl border border-stone-200 dark:border-white/5 p-8 shadow-sm">
+      <div className="bg-white dark:bg-[#1C1C1C] rounded-2xl border border-stone-200 dark:border-white/5 p-6 shadow-sm">
         <h3 className="flex items-center gap-2 mb-6 text-xl font-bold text-stone-900 dark:text-white">
           <Sparkles className="w-5 h-5 text-[#00BFFF]" /> 
           Improvement Suggestions
@@ -195,8 +220,8 @@ const ResultsDashboard = () => {
       </div>
 
       {analysisResults.recommendations && analysisResults.recommendations.length > 0 && (
-        <div className="bg-white dark:bg-[#1C1C1C] rounded-2xl border border-stone-200 dark:border-white/5 p-8 shadow-sm">
-          <h3 className="mb-6 text-xl font-bold text-stone-900 dark:text-white">Actionable Recommendations</h3>
+        <div className="bg-white dark:bg-[#1C1C1C] rounded-2xl border border-stone-200 dark:border-white/5 p-6 shadow-sm">
+          <h3 className="mb-6 text-xl font-bold text-stone-900 dark:text-white">What To Do Next</h3>
           <ul className="space-y-3">
             {analysisResults.recommendations.map((item, i) => (
               <li key={i} className="text-stone-700 dark:text-stone-300">• {item}</li>
@@ -206,12 +231,12 @@ const ResultsDashboard = () => {
       )}
 
       {analysisResults.aiToneAnalysis && (
-        <div className="bg-white dark:bg-[#1C1C1C] rounded-2xl border border-stone-200 dark:border-white/5 p-8 shadow-sm">
-          <h3 className="mb-6 text-xl font-bold text-stone-900 dark:text-white">AI Tone Check</h3>
+        <div className="bg-white dark:bg-[#1C1C1C] rounded-2xl border border-stone-200 dark:border-white/5 p-6 shadow-sm">
+          <h3 className="mb-6 text-xl font-bold text-stone-900 dark:text-white">Writing Style Check</h3>
           <p className="mb-2 font-semibold text-stone-900 dark:text-white">{analysisResults.aiToneAnalysis.label}</p>
           <div className="grid gap-3 mb-5 md:grid-cols-3">
             <div className="rounded-2xl bg-stone-50 dark:bg-[#161616] p-4">
-              <p className="text-xs tracking-wide uppercase text-stone-500 dark:text-stone-400">Confidence</p>
+              <p className="text-xs tracking-wide uppercase text-stone-500 dark:text-stone-400">AI Likelihood</p>
               <p className="text-2xl font-bold text-stone-900 dark:text-white">{analysisResults.aiToneAnalysis.confidence}%</p>
             </div>
             <div className="rounded-2xl bg-stone-50 dark:bg-[#161616] p-4">
@@ -219,7 +244,7 @@ const ResultsDashboard = () => {
               <p className="text-sm text-stone-700 dark:text-stone-300">{analysisResults.aiToneAnalysis.suggestions?.length || 0} items</p>
             </div>
             <div className="rounded-2xl bg-stone-50 dark:bg-[#161616] p-4">
-              <p className="text-xs tracking-wide uppercase text-stone-500 dark:text-stone-400">Authenticity</p>
+              <p className="text-xs tracking-wide uppercase text-stone-500 dark:text-stone-400">Human Score</p>
               <p className="text-2xl font-bold text-stone-900 dark:text-white">{100 - (analysisResults.aiToneAnalysis.confidence || 0)}%</p>
             </div>
           </div>
@@ -236,8 +261,8 @@ const ResultsDashboard = () => {
       )}
 
       {analysisResults.industryBenchmark && (
-        <div className="bg-white dark:bg-[#1C1C1C] rounded-2xl border border-stone-200 dark:border-white/5 p-8 shadow-sm">
-          <h3 className="mb-6 text-xl font-bold text-stone-900 dark:text-white">Industry Benchmark</h3>
+        <div className="bg-white dark:bg-[#1C1C1C] rounded-2xl border border-stone-200 dark:border-white/5 p-6 shadow-sm">
+          <h3 className="mb-6 text-xl font-bold text-stone-900 dark:text-white">How You Compare</h3>
           <div className="grid gap-4 md:grid-cols-2">
             {Object.entries(analysisResults.industryBenchmark)
               .filter(([key]) => key !== 'benchmarkCoverage')
@@ -255,8 +280,8 @@ const ResultsDashboard = () => {
       )}
 
       {typeof analysisResults.percentileRank !== 'undefined' && analysisResults.percentileRank && (
-        <div className="bg-white dark:bg-[#1C1C1C] rounded-2xl border border-stone-200 dark:border-white/5 p-8 shadow-sm">
-          <h3 className="mb-6 text-xl font-bold text-stone-900 dark:text-white">Percentile Rank</h3>
+        <div className="bg-white dark:bg-[#1C1C1C] rounded-2xl border border-stone-200 dark:border-white/5 p-6 shadow-sm">
+          <h3 className="mb-6 text-xl font-bold text-stone-900 dark:text-white">Your Ranking</h3>
           {typeof analysisResults.percentileRank === 'object' ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {analysisResults.percentileRank.role && (
@@ -267,7 +292,7 @@ const ResultsDashboard = () => {
               )}
               {typeof analysisResults.percentileRank.readinessPercentile !== 'undefined' && (
                 <div className="rounded-2xl bg-stone-50 dark:bg-[#161616] p-4">
-                  <p className="text-xs tracking-wide uppercase text-stone-500 dark:text-stone-400">Readiness</p>
+                   <p className="text-xs tracking-wide uppercase text-stone-500 dark:text-stone-400">Job Readiness</p>
                   <p className="text-2xl font-bold text-stone-900 dark:text-white">{analysisResults.percentileRank.readinessPercentile.toFixed(1)}%</p>
                 </div>
               )}
@@ -279,13 +304,13 @@ const ResultsDashboard = () => {
               )}
               {typeof analysisResults.percentileRank.realityPercentile !== 'undefined' && (
                 <div className="rounded-2xl bg-stone-50 dark:bg-[#161616] p-4">
-                  <p className="text-xs tracking-wide uppercase text-stone-500 dark:text-stone-400">Reality</p>
+                   <p className="text-xs tracking-wide uppercase text-stone-500 dark:text-stone-400">ATS Score</p>
                   <p className="text-2xl font-bold text-stone-900 dark:text-white">{analysisResults.percentileRank.realityPercentile.toFixed(1)}%</p>
                 </div>
               )}
               {typeof analysisResults.percentileRank.authPercentile !== 'undefined' && (
                 <div className="rounded-2xl bg-stone-50 dark:bg-[#161616] p-4">
-                  <p className="text-xs tracking-wide uppercase text-stone-500 dark:text-stone-400">Authenticity</p>
+                   <p className="text-xs tracking-wide uppercase text-stone-500 dark:text-stone-400">Human Score</p>
                   <p className="text-2xl font-bold text-stone-900 dark:text-white">{analysisResults.percentileRank.authPercentile.toFixed(1)}%</p>
                 </div>
               )}
@@ -305,8 +330,8 @@ const ResultsDashboard = () => {
       <LearningRoadmap roadmap={analysisResults.learningRoadmap} />
 
       {(analysisResults.interviewPreparation || []).length > 0 && (
-        <div className="bg-white dark:bg-[#1C1C1C] rounded-2xl border border-stone-200 dark:border-white/5 p-8 shadow-sm">
-          <h3 className="mb-6 text-xl font-bold text-stone-900 dark:text-white">Interview Preparation</h3>
+        <div className="bg-white dark:bg-[#1C1C1C] rounded-2xl border border-stone-200 dark:border-white/5 p-6 shadow-sm">
+          <h3 className="mb-6 text-xl font-bold text-stone-900 dark:text-white">Interview Tips</h3>
           <div className="grid gap-4">
             {analysisResults.interviewPreparation.map((item, i) => (
               <div key={i} className="rounded-2xl bg-stone-50 dark:bg-[#161616] p-4">
@@ -320,8 +345,8 @@ const ResultsDashboard = () => {
       )}
 
       {(analysisResults.mockInterviewQuestions || []).length > 0 && (
-        <div className="bg-white dark:bg-[#1C1C1C] rounded-2xl border border-stone-200 dark:border-white/5 p-8 shadow-sm">
-          <h3 className="mb-6 text-xl font-bold text-stone-900 dark:text-white">Mock Interview Questions</h3>
+        <div className="bg-white dark:bg-[#1C1C1C] rounded-2xl border border-stone-200 dark:border-white/5 p-6 shadow-sm">
+          <h3 className="mb-6 text-xl font-bold text-stone-900 dark:text-white">Practice Questions</h3>
           <div className="space-y-4">
             {analysisResults.mockInterviewQuestions.map((question, i) => {
               const isVisible = hoveredQuestion === i || expandedQuestion === i;
@@ -336,7 +361,7 @@ const ResultsDashboard = () => {
                   <p className="font-semibold text-stone-900 dark:text-white">{question.type}:</p>
                   <p className={`text-sm mt-1 transition-colors ${isVisible ? 'font-bold text-stone-900 dark:text-white' : 'font-medium text-stone-500 dark:text-stone-400'}`}>{question.question}</p>
                   <div className={`mt-3 overflow-hidden transition-all ${isVisible ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
-                    <p className="text-[11px] uppercase tracking-[0.2em] text-stone-400 mb-2">Expected answer</p>
+                    <p className="text-[11px] uppercase tracking-[0.2em] text-stone-400 mb-2">Sample Answer</p>
                     <p className="text-sm text-stone-700 dark:text-stone-300">{question.expectedAnswer}</p>
                   </div>
                 </div>

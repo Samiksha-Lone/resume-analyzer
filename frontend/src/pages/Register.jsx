@@ -90,14 +90,14 @@ const Register = () => {
           className="flex flex-col items-center text-center mb-6"
         >
           <Link to="/" className="flex items-center gap-3 mb-4 group">
-             <div className="w-10 h-10 rounded-2xl bg-accent flex items-center justify-center shadow-lg shadow-accent/20 group-hover:scale-110 transition-transform">
+             <div className="w-10 h-10 rounded-2xl bg-accent flex items-center justify-center group-hover:scale-110 transition-transform">
                 <BrainCircuit className="w-6 h-6 text-white" />
              </div>
              <span className="text-xl font-black tracking-tighter dark:text-white">HIRE<span className="text-accent">METRIC</span></span>
           </Link>
           
           <h1 className="text-4xl font-black tracking-tighter dark:text-white leading-none">
-            Member <span className="text-accent underline decoration-stone-800/30">Signup.</span>
+            Create <span className="text-accent underline decoration-stone-800/30">Account.</span>
           </h1>
         </motion.div>
 
@@ -117,12 +117,12 @@ const Register = () => {
 
               <div className="space-y-2.5">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-4">Full Identity</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-4">Full Name</label>
                   <div className="relative group">
                     <User className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 group-focus-within:text-accent transition-colors" />
                     <input 
                       type="text" 
-                      placeholder="Display Name"
+                      placeholder="Your full name"
                       className="w-full bg-stone-50 dark:bg-[#1C1C1C] border border-stone-200 dark:border-white/5 rounded-2xl py-3 pl-14 pr-8 focus:outline-none focus:ring-1 focus:ring-accent/30 text-sm font-medium text-stone-900 dark:text-white transition-all shadow-inner"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
@@ -132,7 +132,7 @@ const Register = () => {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-4">Credential Email</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-4">Email</label>
                   <div className="relative group">
                     <Mail className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 group-focus-within:text-accent transition-colors" />
                     <input 
@@ -147,12 +147,12 @@ const Register = () => {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-4">Access Secret</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-4">Password</label>
                   <div className="relative group">
                     <Lock className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 group-focus-within:text-accent transition-colors" />
                     <input 
                       type={showPassword ? 'text' : 'password'} 
-                      placeholder="Secure Password"
+                      placeholder="Choose a password"
                       className="w-full bg-stone-50 dark:bg-[#1C1C1C] border border-stone-200 dark:border-white/5 rounded-2xl py-3 pl-14 pr-12 focus:outline-none focus:ring-1 focus:ring-accent/30 text-sm font-medium text-stone-900 dark:text-white transition-all shadow-inner"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -179,11 +179,11 @@ const Register = () => {
                   {isSubmitting ? (
                     <span className="flex items-center gap-3">
                        <Activity className="pulse-slow w-4 h-4" /> 
-                       Deploying Account...
+                       Creating account...
                     </span>
                   ) : (
                     <span className="flex items-center gap-2">
-                       Create Membership <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                       Create Account <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </span>
                   )}
                 </Button>

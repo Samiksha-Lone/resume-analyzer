@@ -1,5 +1,5 @@
 const { success, notFound } = require('../utils/apiResponse');
-const { getUserHistory, compareSnapshots } = require('../services/history.service');
+const { getUserHistory, compareSnapshots, getHistoryById, deleteHistoryById } = require('../services/history.service');
 
 /**
  * GET /api/history
@@ -32,4 +32,32 @@ async function compareHistory(req, res, next) {
   }
 }
 
-module.exports = { getHistory, compareHistory };
+/**
+ * GET /api/history/:id
+ * Returns a specific history entry.
+ */
+async function getHistoryDetail(req, res, next) {
+  try {
+    const entry = await getHistoryById(req.params.id, req.user._id);
+    if (!entry) return notFound(res, 'History entry');
+    return success(res, { history: entry });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * DELETE /api/history/:id
+ * Deletes a specific history entry.
+ */
+async function deleteHistory(req, res, next) {
+  try {
+    const deleted = await deleteHistoryById(req.params.id, req.user._id);
+    if (!deleted) return notFound(res, 'History entry');
+    return success(res, null, 200, 'History entry deleted successfully');
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { getHistory, compareHistory, getHistoryDetail, deleteHistory };

@@ -99,6 +99,9 @@ data.json
 # Optional npm cache directory
 /.npm
 
+# Documentation/Notes (internal use only)
+ALGORITHM_IMPROVEMENTS.md
+
 # Optional REPL history
 .node_repl_history
 

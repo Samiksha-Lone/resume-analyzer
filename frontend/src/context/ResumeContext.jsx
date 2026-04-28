@@ -35,8 +35,8 @@ export const ResumeProvider = ({ children }) => {
     setIsLoading(true);
     setError(null);
     try {
-      await api.delete(`/resumes/${id}`);
-      setHistory(prev => prev.filter(item => item._id !== id));
+      await api.delete(`/history/${id}`);
+      setAnalysisHistory(prev => prev.filter(item => item._id !== id));
       return { success: true };
     } catch (err) {
       const errorMsg = err.response?.data?.error || 'Error deleting history item';
@@ -150,6 +150,29 @@ export const ResumeProvider = ({ children }) => {
   };
 
 
+  const getHistoryById = async (id) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await api.get(`/history/${id}`);
+      // The backend returns { success: true, data: { history: entry } }
+      const entry = response.data?.data?.history || response.data?.history;
+      
+      if (entry && entry.snapshot) {
+        setAnalysisResults(entry.snapshot);
+        return entry;
+      } else {
+        throw new Error("Analysis snapshot not found in history entry");
+      }
+    } catch (err) {
+      const msg = err.response?.data?.error || err.message || 'Error fetching historical analysis';
+      setError(msg);
+      throw new Error(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <ResumeContext.Provider value={{
       currentResume,
@@ -164,6 +187,7 @@ export const ResumeProvider = ({ children }) => {
       fetchAnalysisHistory,
       compareAnalysisHistory,
       getResumeById,
+      getHistoryById,
       deleteHistoryItem,
       fetchAnalysisStatus,
       matchResume,

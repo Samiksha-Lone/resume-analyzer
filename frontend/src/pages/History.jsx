@@ -4,15 +4,17 @@ import {
   ExternalLink,
   Trash2,
   FileText,
-  Search
+  Search,
+  Download
 } from 'lucide-react';
 import Card, { CardContent } from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { useResumes } from '../context/ResumeContext';
 import { useNavigate } from 'react-router-dom';
+import { generateAtsResume } from '../utils/pdfGenerator';
 
 const History = () => {
-  const { fetchHistory, analysisHistory, fetchAnalysisHistory, compareAnalysisHistory, isLoading, getResumeById, deleteHistoryItem } = useResumes();
+  const { fetchHistory, analysisHistory, fetchAnalysisHistory, compareAnalysisHistory, isLoading, getResumeById, getHistoryById, deleteHistoryItem } = useResumes();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [compareFirst, setCompareFirst] = useState('');
@@ -26,8 +28,12 @@ const History = () => {
   }, [fetchHistory, fetchAnalysisHistory]);
 
   const handleViewDetails = async (id) => {
-    await getResumeById(id);
-    navigate('/results');
+    try {
+      await getHistoryById(id);
+      navigate('/results');
+    } catch (err) {
+      console.error("Navigation failed:", err);
+    }
   };
 
   const handleCompare = async () => {
@@ -60,7 +66,7 @@ const History = () => {
   });
 
   return (
-    <div className="pb-20 space-y-10 duration-500 animate-in fade-in slide-in-from-bottom-4">
+    <div className="pb-10 space-y-6 duration-500 animate-in fade-in slide-in-from-bottom-4">
       
       {/* Header */}
       <div className="flex flex-col justify-between gap-6 pb-6 border-b md:flex-row md:items-end border-stone-200 dark:border-white/5">
@@ -85,30 +91,30 @@ const History = () => {
            </div>
            <div className="grid gap-3 md:grid-cols-[1fr_auto] items-end">
              <div className="grid gap-3 sm:grid-cols-2">
-               <select
-                 value={compareFirst}
-                 onChange={(e) => setCompareFirst(e.target.value)}
-                 className="w-full px-4 py-3 text-sm border bg-stone-50 dark:bg-white/5 border-stone-200 dark:border-white/10 rounded-xl text-stone-900 dark:text-white"
-               >
-                 <option value="">Select first snapshot</option>
-                 {analysisHistory.map((item) => (
-                   <option key={item._id} value={item._id}>
-                     {item.resumeName} · {item.jobTitle || 'No title'} · {new Date(item.createdAt).toLocaleDateString()}
-                   </option>
-                 ))}
-               </select>
-               <select
-                 value={compareSecond}
-                 onChange={(e) => setCompareSecond(e.target.value)}
-                 className="w-full px-4 py-3 text-sm border bg-stone-50 dark:bg-white/5 border-stone-200 dark:border-white/10 rounded-xl text-stone-900 dark:text-white"
-               >
-                 <option value="">Select second snapshot</option>
-                 {analysisHistory.map((item) => (
-                   <option key={item._id} value={item._id}>
-                     {item.resumeName} · {item.jobTitle || 'No title'} · {new Date(item.createdAt).toLocaleDateString()}
-                   </option>
-                 ))}
-               </select>
+                <select
+                  value={compareFirst}
+                  onChange={(e) => setCompareFirst(e.target.value)}
+                  className="w-full px-4 py-3 text-sm border bg-white dark:bg-[#262626] border-stone-200 dark:border-white/10 rounded-xl text-stone-900 dark:text-white"
+                >
+                  <option value="" className="text-black bg-white">Select first snapshot</option>
+                  {analysisHistory.map((item) => (
+                    <option key={item._id} value={item._id} className="text-black bg-white">
+                      {item.resumeName} · {item.jobTitle || 'No title'} · {new Date(item.createdAt).toLocaleDateString()}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={compareSecond}
+                  onChange={(e) => setCompareSecond(e.target.value)}
+                  className="w-full px-4 py-3 text-sm border bg-white dark:bg-[#262626] border-stone-200 dark:border-white/10 rounded-xl text-stone-900 dark:text-white"
+                >
+                  <option value="" className="text-black bg-white">Select second snapshot</option>
+                  {analysisHistory.map((item) => (
+                    <option key={item._id} value={item._id} className="text-black bg-white">
+                      {item.resumeName} · {item.jobTitle || 'No title'} · {new Date(item.createdAt).toLocaleDateString()}
+                    </option>
+                  ))}
+                </select>
              </div>
              <button
                onClick={handleCompare}
@@ -121,13 +127,18 @@ const History = () => {
            {compareResult && (
              <div className="rounded-2xl bg-stone-50 dark:bg-[#161616] p-6 border border-stone-200 dark:border-white/10">
                <h3 className="mb-3 text-lg font-bold text-stone-900 dark:text-white">Comparison Results</h3>
-               <div className="grid gap-3 md:grid-cols-3">
-                 {Object.entries(compareResult.delta || {}).map(([key, value]) => (
-                   <div key={key} className="rounded-2xl bg-white dark:bg-[#1C1C1C] p-4 border border-stone-200 dark:border-white/10">
-                     <p className="text-xs tracking-wide uppercase text-stone-500 dark:text-stone-400">{key}</p>
-                     <p className="text-2xl font-bold text-stone-900 dark:text-white">{value >= 0 ? '+' : ''}{value}%</p>
-                   </div>
-                 ))}
+               <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
+                 {Object.entries(compareResult.delta || {}).map(([key, value]) => {
+                   const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                   return (
+                     <div key={key} className="rounded-2xl bg-white dark:bg-[#1C1C1C] p-4 border border-stone-200 dark:border-white/10 flex flex-col justify-center">
+                       <p className="text-[10px] font-bold tracking-wider uppercase text-stone-500 dark:text-stone-400 mb-1">{label}</p>
+                       <p className={`text-2xl font-bold ${value > 0 ? 'text-emerald-500' : value < 0 ? 'text-rose-500' : 'text-stone-900 dark:text-white'}`}>
+                         {value >= 0 ? '+' : ''}{value}%
+                       </p>
+                     </div>
+                   );
+                 })}
                </div>
              </div>
            )}
@@ -149,21 +160,28 @@ const History = () => {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <FileText className="w-5 h-5 text-stone-400" />
-                        <span className="font-medium text-stone-900 dark:text-white truncate max-w-[200px] md:max-w-xs">{item.originalName || item.filename}</span>
+                        <span className="font-medium text-stone-900 dark:text-white truncate max-w-[200px] md:max-w-xs">{item.resumeName || 'Resume'}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="font-bold text-stone-900 dark:text-white">{item.analysis?.realityCheck?.score || item.analysis?.readinessScore || 0}%</span>
+                      <span className="font-bold text-stone-900 dark:text-white">{Math.round(item.scores?.readinessScore || 0)}%</span>
                     </td>
                     <td className="px-6 py-4 text-sm text-stone-500 dark:text-stone-400">
                       {new Date(item.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 text-right">
                        <div className="flex items-center justify-end gap-2">
+                         <button 
+                           onClick={() => generateAtsResume(item.snapshot?.resumeText || item.snapshot?.extractedText, item.snapshot?.rewriteSuggestions)}
+                           className="p-2 text-stone-400 hover:text-[#00BFFF] transition-colors rounded-lg hover:bg-[#00BFFF]/10"
+                           title="Download PDF"
+                         >
+                            <Download className="w-4 h-4" />
+                         </button>
                          <button onClick={() => handleViewDetails(item._id)} className="p-2 text-stone-400 hover:text-[#00BFFF] transition-colors rounded-lg hover:bg-[#00BFFF]/10">
                             <ExternalLink className="w-4 h-4" />
                          </button>
-                         <button onClick={() => handleDelete(item._id, item.originalName)} className="p-2 transition-colors rounded-lg text-stone-400 hover:text-rose-500 hover:bg-rose-500/10">
+                         <button onClick={() => handleDelete(item._id, item.resumeName)} className="p-2 transition-colors rounded-lg text-stone-400 hover:text-rose-500 hover:bg-rose-500/10">
                             <Trash2 className="w-4 h-4" />
                          </button>
                        </div>

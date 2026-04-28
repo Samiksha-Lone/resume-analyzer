@@ -1,122 +1,133 @@
-# Resume Analyzer
+# ScoreSync — AI-Powered Resume Optimization
 
-AI-powered resume analysis tool that evaluates resumes against job descriptions, provides ATS compatibility scores, and generates personalized learning roadmaps to improve candidacy.
+> A professional full-stack MERN application that helps job seekers optimize their resumes with ATS scoring, skill gap analysis, and AI-powered recommendations.
 
 ## 🔗 Links
-
-- **Live Demo**: [Coming Soon]
 - **GitHub Repository**: [https://github.com/Samiksha-Lone/resume-analyzer](https://github.com/Samiksha-Lone/resume-analyzer)
 
-## 📋 Problem Statement
+## Overview
 
-In today's competitive job market, job seekers struggle with optimizing resumes due to generic advice, ATS compatibility issues, unidentified skill gaps, and lack of progress tracking, leading to wasted applications and missed opportunities.
+ScoreSync is an intelligent career growth platform designed to bridge the gap between job seekers and Applicant Tracking Systems (ATS). By leveraging advanced AI models, it provides real-time scoring, deep skill analysis, and personalized learning roadmaps to help users navigate the modern hiring landscape.
 
-## 🗺️ Problem–Solution Mapping
+## Problem Statement
 
-The Resume Analyzer addresses these challenges by providing AI-powered specific feedback on content and tone, automated ATS scoring, resume-job description matching with gap identification, analysis history for progress tracking, and AI-generated learning roadmaps for personalized improvement plans.
+- **Blind Applications**: Job seekers often apply to roles without knowing if their resumes can pass automated ATS filters.
+- **Vague Feedback**: Standard resume reviews lack actionable, role-specific data on skill gaps.
+- **Formatting Issues**: Improper resume structure can lead to data loss during parsing.
+- **Lack of Direction**: Difficulty identifying exactly what to learn to improve candidacy for specific roles.
 
-## 🏗️ System Architecture
+## Solution
 
-- **Frontend**: React-based responsive interface for uploads and results visualization
-- **Backend**: Node.js/Express API handling file processing, AI analysis, and database operations
-- **Database**: MongoDB for storing user data, resumes, and analysis history
-- **Authentication**: JWT-based secure user management
-- **AI Integration**: Local Ollama models with cloud OpenAI fallback for privacy and scalability
+ScoreSync solves these challenges by providing a comprehensive analysis engine that compares resumes against specific job descriptions. It offers a proprietary ATS compatibility score, detects technical depth through a "Reality Check" algorithm, and generates 2-week personalized learning roadmaps to help users bridge their skill gaps.
 
-## ✨ Features
+## Key Features
 
-- Resume upload support for PDF and DOCX formats
-- AI-powered content and tone analysis
-- Skill matching against job descriptions
-- ATS compatibility scoring
-- Progress tracking with historical analysis
-- Personalized learning roadmaps
-- Secure user authentication
-- Responsive mobile-friendly design
+- 🤖 **AI-Powered Analysis** — High-fidelity resume evaluation using Ollama and Gemini LLM orchestration
+- 🎯 **Resume-Job Matching** — Precise alignment check against specific target job descriptions
+- 📊 **ATS Compatibility Score** — Real-time 0-100% scoring with actionable improvement feedback
+- 🔍 **Reality Check** — Advanced detection of impact metrics, technical depth, and AI-generated tone
+- 📚 **Learning Roadmaps** — 2-week personalized plans with targeted tasks to bridge skill gaps
+- 💬 **Interview Preparation** — Role-specific mock questions with AI-suggested "Best Answers"
+- 💾 **Branded PDF Export** — Download professionally formatted, ATS-optimized resumes with ScoreSync branding
+- 🔄 **Analysis History** — Comprehensive tracking and side-by-side comparison of historical analyses
+- 🌗 **Premium UI/UX** — Modern, high-performance interface with full Dark Mode support
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-- **Frontend**: React, Vite, Tailwind CSS
-- **Backend**: Node.js, Express.js
-- **Database**: MongoDB Atlas
-- **Authentication**: JWT, bcrypt
-- **AI**: AI Integration, pdf-parse, mammoth
+| Layer | Technology |
+|---|---|
+| **Frontend** | React 19, Vite, Framer Motion, Lucide React |
+| **Backend** | Node.js, Express.js |
+| **Database** | MongoDB Atlas |
+| **AI & NLP** | Ollama LLM, Gemini API, Natural.js |
+| **Document Gen** | jsPDF (Branded vector generation) |
+| **Auth** | JWT, bcryptjs |
 
-## 🚀 Installation / Setup
+## Architecture / Flow
+
+```text
+User → React Frontend (Vite) → REST API → MongoDB Atlas
+                                  ↓
+                        AI Analysis Pipeline (Ollama/Gemini)
+                        NLP Keyword Extraction & Scoring
+                        Branded PDF Generation Service
+```
+
+## My Contribution
+
+**I independently designed and built this entire project from scratch**, including:
+
+- 🖥️ **Frontend** — All React components, routing, state management, and the responsive design system
+- ⚙️ **Backend** — Scalable Express server, RESTful APIs, and complex MongoDB analysis schemas
+- 🤖 **AI Integration** — Orchestration of multiple LLMs and the NLP-based scoring algorithms
+- 📊 **Algorithm Development** — Designing the multi-layer ATS scoring and "Reality Check" engines
+- 🔐 **Security & Auth** — Secure JWT authentication and data protection layers
+
+## Setup
 
 ### Prerequisites
-- Node.js (v16 or higher)
-- MongoDB (local or cloud instance)
-- Ollama (for AI analysis)
+Node.js 18+, npm, MongoDB Atlas account, Ollama (optional for local LLM)
 
-### Backend Setup
+### 1. Backend
+
 ```bash
 cd backend
 npm install
-cp .env.example .env  # Configure environment variables
-npm run dev
 ```
 
-### Frontend Setup
+Create a `.env` file:
+
+```env
+PORT=3000
+MONGO_URI=mongodb+srv://<your-cluster>
+JWT_SECRET=your_secret_key
+OLLAMA_BASE_URL=http://localhost:11434
+GEMINI_API_KEY=your_gemini_key
+API_URL=http://localhost:3000
+```
+
+```bash
+npm run dev   # http://localhost:3000
+```
+
+### 2. Frontend
+
 ```bash
 cd frontend
 npm install
-npm run dev
 ```
 
-### AI Setup
-Choose your AI provider:
+Create a `.env.local` file:
 
-**For Local AI (Ollama - Default):**
-```bash
-# Install and start Ollama
-ollama serve
-
-# Pull a model
-ollama pull llama2
-```
-
-**For Cloud AI (OpenAI - Production):**
-```bash
-# Get API key from https://platform.openai.com/api-keys
-# Add OPENAI_API_KEY to your .env file
-# Set AI_PROVIDER=openai in .env
-```
-
-### Environment Configuration
-Create `.env` file in backend directory:
 ```env
-PORT=3000
-MONGO_URI=mongodb://127.0.0.1:27017/resume-analyzer
-JWT_SECRET=your-secret-key
-MAX_FILE_SIZE=10485760
-
-# AI Configuration (choose one)
-AI_PROVIDER=ollama  # or 'openai' for production
-
-# Ollama (local AI - default)
-OLLAMA_HOST=http://127.0.0.1:11434
-OLLAMA_MODEL=llama2
-
-# OpenAI (cloud AI - production)
-OPENAI_API_KEY=your-openai-api-key-here
-OPENAI_MODEL=gpt-4o-mini
+VITE_API_BASE=http://localhost:3000/api
 ```
 
-## 📸 Screenshots
+```bash
+npm run dev   # http://localhost:5173
+```
 
-![Home](outputs/home.webp)
+## Screenshots
 
-![Dashboard](outputs/dashboard.webp)
+### Landing Page
+![Landing Page](outputs/home.webp)
 
-![Analysis](outputs/result.webp)
+### User Dashboard
+![User Dashboard](outputs/dashboard.webp)
 
-## 📄 License
+### Analysis Results
+![Analysis Results](outputs/result.webp)
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+## Future Improvements
 
-## 🙏 Credit
+- [ ] Browser extension for real-time analysis of job postings on LinkedIn and Indeed
+- [ ] Collaborative resume review feature for peer and mentor feedback
+- [ ] Integration with Job Boards for one-click optimized applications
 
-If you use or build upon this project, please provide attribution:  
-Samiksha Lone  
-https://github.com/Samiksha-Lone
+## License
+
+ISC License — see [LICENSE](LICENSE) for details.
+
+## Credits
+
+**Developed by [Samiksha Lone](https://github.com/Samiksha-Lone)**
